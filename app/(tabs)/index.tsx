@@ -35,6 +35,10 @@ import {
   PlacePriceInfo,
   getPlacePrices,
 } from '../../lib/placePrices';
+import {
+  ExperienceFeedEvent,
+  getExperienceFeed,
+} from '../../lib/experienceFeed';
 
 type AppStep = 'setup' | 'results' | 'detail';
 
@@ -145,6 +149,8 @@ export default function HomeScreen() {
   const [places, setPlaces] = useState<DiscoveredPlace[]>([]);
   const [placesLoading, setPlacesLoading] = useState(false);
   const [placesError, setPlacesError] = useState('');
+  const [events, setEvents] = useState<ExperienceFeedEvent[]>([]);
+  const [eventsError, setEventsError] = useState('');
   const [usedRadiusKm, setUsedRadiusKm] = useState<number | null>(null);
   const [savedTips, setSavedTips] = useState<string[]>([]);
   const [activePlace, setActivePlace] =
@@ -262,6 +268,63 @@ export default function HomeScreen() {
     );
   }
 
+  function formatEventDate(event: ExperienceFeedEvent) {
+    if (!event.startsAt) {
+      return 'Termín bude doplnený';
+    }
+
+    const start = new Date(event.startsAt);
+    const date = start.toLocaleDateString('sk-SK', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+
+    if (event.allDay) {
+      return date;
+    }
+
+    const time = start.toLocaleTimeString('sk-SK', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    return `${date} o ${time}`;
+  }
+
+  function formatEventPrice(event: ExperienceFeedEvent) {
+    if (event.freeEntry || event.priceMin === 0) {
+      return 'Zadarmo';
+    }
+
+    if (event.priceMin !== null && event.priceMax !== null) {
+      if (event.priceMin === event.priceMax) {
+        return `${event.priceMin.toFixed(2)} €`;
+      }
+
+      return `${event.priceMin.toFixed(2)}–${event.priceMax.toFixed(2)} €`;
+    }
+
+    if (event.priceMin !== null) {
+      return `Od ${event.priceMin.toFixed(2)} €`;
+    }
+
+    return 'Cena na webe';
+  }
+
+  async function handleOpenEvent(event: ExperienceFeedEvent) {
+    if (!event.purchaseUrl) {
+      setEventsError('Oficiálny odkaz na podujatie zatiaľ chýba.');
+      return;
+    }
+
+    try {
+      await Linking.openURL(event.purchaseUrl);
+    } catch {
+      setEventsError('Odkaz na podujatie sa nepodarilo otvoriť.');
+    }
+  }
+
   async function handleOpenPlace(place: DiscoveredPlace) {
     setActivePlace(place);
     setPlaceDetails(null);
@@ -329,6 +392,7 @@ export default function HomeScreen() {
     Keyboard.dismiss();
     setPlacesLoading(true);
     setPlacesError('');
+    setEventsError('');
 
     try {
       const cityDetails = await getCityDetails(
@@ -337,26 +401,70 @@ export default function HomeScreen() {
 
       setSelectedCityDetails(cityDetails);
 
-      const result = await discoverPlaces({
-        latitude: cityDetails.latitude,
-        longitude: cityDetails.longitude,
-        radiusKm: radius,
-      });
+      const [placesResult, eventsResult] = await Promise.allSettled([
+        discoverPlaces({
+          latitude: cityDetails.latitude,
+          longitude: cityDetails.longitude,
+          radiusKm: radius,
+        }),
+        getExperienceFeed({
+          latitude: cityDetails.latitude,
+          longitude: cityDetails.longitude,
+          radiusKm: radius,
+          childrenAges,
+          limit: 30,
+        }),
+      ]);
 
-      setPlaces(result.places);
-      setUsedRadiusKm(result.search.usedRadiusKm);
+      if (placesResult.status === 'fulfilled') {
+        setPlaces(placesResult.value.places);
+        setUsedRadiusKm(
+          placesResult.value.search.usedRadiusKm,
+        );
+      } else {
+        setPlaces([]);
+        setUsedRadiusKm(radius);
+        setPlacesError(
+          placesResult.reason instanceof Error
+            ? placesResult.reason.message
+            : 'Trvalé výlety sa nepodarilo načítať.',
+        );
+      }
+
+      if (eventsResult.status === 'fulfilled') {
+        setEvents(eventsResult.value.events);
+      } else {
+        setEvents([]);
+        setEventsError(
+          eventsResult.reason instanceof Error
+            ? eventsResult.reason.message
+            : 'Aktuálne podujatia sa nepodarilo načítať.',
+        );
+      }
+
+      if (
+        placesResult.status === 'rejected' &&
+        eventsResult.status === 'rejected'
+      ) {
+        throw new Error(
+          'Nepodarilo sa načítať výlety ani podujatia.',
+        );
+      }
+
       setStep('results');
     } catch (error) {
       setPlaces([]);
+      setEvents([]);
       setPlacesError(
         error instanceof Error
           ? error.message
-          : 'Výlety sa nepodarilo načítať.',
+          : 'Rodinné zážitky sa nepodarilo načítať.',
       );
     } finally {
       setPlacesLoading(false);
     }
   }
+
 
   if (step === 'detail' && activePlace) {
     const isSaved = savedTips.includes(activePlace.placeId);
@@ -776,8 +884,110 @@ export default function HomeScreen() {
 
             {radius > 50 && (
               <Text style={styles.demoText}>
-                Pri voľbe {radius} km teraz hľadáme prvých 50 km.
-                Väčší okruh rozšírime ďalším modulom.
+                Pri trvalých výletoch teraz Google vyhľadáva
+                prvých 50 km. Podujatia používajú celý zvolený
+                okruh.
+              </Text>
+            )}
+
+            <View style={styles.feedSectionHeader}>
+              <View>
+                <Text style={styles.feedSectionEyebrow}>
+                  ČO SA DEJE TERAZ
+                </Text>
+                <Text style={styles.feedSectionTitle}>
+                  Aktuálne podujatia
+                </Text>
+              </View>
+              <Text style={styles.feedSectionEmoji}>🎟️</Text>
+            </View>
+
+            {eventsError.length > 0 && (
+              <Text style={styles.feedErrorText}>
+                {eventsError}
+              </Text>
+            )}
+
+            {events.length === 0 ? (
+              <View style={styles.feedEmptyCard}>
+                <Text style={styles.feedEmptyEmoji}>📅</Text>
+                <View style={styles.feedEmptyTextBox}>
+                  <Text style={styles.feedEmptyTitle}>
+                    V tomto okruhu zatiaľ nemáme aktuálnu akciu
+                  </Text>
+                  <Text style={styles.feedEmptyText}>
+                    Trvalé výlety nižšie sú stále k dispozícii.
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              events.map((event) => (
+                <View key={event.id} style={styles.eventCard}>
+                  <View style={styles.eventDateBadge}>
+                    <Text style={styles.eventDateEmoji}>
+                      {event.emoji || '🎪'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.eventBody}>
+                    <Text style={styles.eventDateText}>
+                      {formatEventDate(event)}
+                    </Text>
+
+                    <Text style={styles.eventTitle}>
+                      {event.title}
+                    </Text>
+
+                    <Text style={styles.eventLocation}>
+                      📍 {event.city || event.venueName || 'Slovensko'}
+                      {event.distanceKm !== null
+                        ? ` • ${event.distanceKm} km`
+                        : ''}
+                    </Text>
+
+                    <View style={styles.eventMetaRow}>
+                      <Text style={styles.eventCategory}>
+                        {event.categoryName || 'Rodinné podujatie'}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.eventPrice,
+                          event.freeEntry && styles.eventPriceFree,
+                        ]}
+                      >
+                        {formatEventPrice(event)}
+                      </Text>
+                    </View>
+
+                    <Pressable
+                      onPress={() => handleOpenEvent(event)}
+                      style={styles.eventOpenButton}
+                    >
+                      <Text style={styles.eventOpenButtonText}>
+                        Otvoriť detail alebo lístky →
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ))
+            )}
+
+            <View style={styles.feedSectionHeader}>
+              <View>
+                <Text style={styles.feedSectionEyebrow}>
+                  KEDYKOĽVEK
+                </Text>
+                <Text style={styles.feedSectionTitle}>
+                  Trvalé výlety
+                </Text>
+              </View>
+              <Text style={styles.feedSectionEmoji}>🗺️</Text>
+            </View>
+
+            {placesError.length > 0 && (
+              <Text style={styles.feedErrorText}>
+                {placesError}
               </Text>
             )}
 
@@ -1167,7 +1377,7 @@ export default function HomeScreen() {
                     color="#FFFFFF"
                   />
                   <Text style={styles.mainButtonTextLoading}>
-                    Hľadám reálne výlety…
+                    Hľadám výlety a podujatia…
                   </Text>
                 </>
               ) : (
@@ -1794,6 +2004,152 @@ const styles = StyleSheet.create({
   saveButtonTextActive: {
     color: '#BE4F7D',
   },
+  feedSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 12,
+    paddingHorizontal: 2,
+  },
+  feedSectionEyebrow: {
+    color: '#2785A8',
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 1.2,
+  },
+  feedSectionTitle: {
+    color: '#164761',
+    fontSize: 23,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  feedSectionEmoji: {
+    fontSize: 31,
+  },
+  feedErrorText: {
+    color: '#A53A4C',
+    backgroundColor: '#FFF0F3',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    marginBottom: 12,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  feedEmptyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    borderRadius: 19,
+    padding: 16,
+    marginBottom: 14,
+    elevation: 3,
+  },
+  feedEmptyEmoji: {
+    fontSize: 30,
+    marginRight: 13,
+  },
+  feedEmptyTextBox: {
+    flex: 1,
+  },
+  feedEmptyTitle: {
+    color: '#164761',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  feedEmptyText: {
+    color: '#6E8793',
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 3,
+  },
+  eventCard: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.97)',
+    borderRadius: 21,
+    padding: 15,
+    marginBottom: 14,
+    elevation: 4,
+    shadowColor: '#7B4AA7',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+  },
+  eventDateBadge: {
+    width: 55,
+    height: 55,
+    borderRadius: 17,
+    backgroundColor: '#F3E9FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  eventDateEmoji: {
+    fontSize: 27,
+  },
+  eventBody: {
+    flex: 1,
+  },
+  eventDateText: {
+    color: '#8B4BB0',
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  eventTitle: {
+    color: '#243F50',
+    fontSize: 17,
+    fontWeight: '900',
+    lineHeight: 22,
+    marginTop: 4,
+  },
+  eventLocation: {
+    color: '#718994',
+    fontSize: 13,
+    marginTop: 5,
+  },
+  eventMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 11,
+  },
+  eventCategory: {
+    color: '#704494',
+    backgroundColor: '#F4EAFC',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 9,
+    fontSize: 11,
+    fontWeight: '800',
+    marginRight: 8,
+  },
+  eventPrice: {
+    color: '#164761',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  eventPriceFree: {
+    color: '#208351',
+  },
+  eventOpenButton: {
+    backgroundColor: '#7F4AA5',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  eventOpenButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+
   savedCounter: {
     color: '#426D7D',
     textAlign: 'center',
