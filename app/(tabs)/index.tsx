@@ -40,7 +40,10 @@ import {
   getExperienceFeed,
 } from '../../lib/experienceFeed';
 
-type AppStep = 'setup' | 'results' | 'detail';
+type AppStep = 'setup' | 'results' | 'detail' | 'eventDetail';
+
+type EventFilter = 'all' | 'today' | 'weekend' | 'free';
+type EventSort = 'date' | 'distance';
 
 type StepperProps = {
   label: string;
@@ -67,6 +70,52 @@ function formatChildAge(age: number) {
   }
 
   return `${age} rokov`;
+}
+
+function startOfDay(date: Date) {
+  const result = new Date(date);
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
+
+function endOfDay(date: Date) {
+  const result = new Date(date);
+  result.setHours(23, 59, 59, 999);
+  return result;
+}
+
+function getWeekendRange(reference = new Date()) {
+  const day = reference.getDay();
+  const saturday = startOfDay(reference);
+
+  if (day === 0) {
+    saturday.setDate(saturday.getDate() - 1);
+  } else if (day !== 6) {
+    saturday.setDate(saturday.getDate() + (6 - day));
+  }
+
+  const sunday = endOfDay(saturday);
+  sunday.setDate(saturday.getDate() + 1);
+
+  return { saturday, sunday };
+}
+
+function isEventInRange(
+  event: ExperienceFeedEvent,
+  from: Date,
+  to: Date,
+) {
+  if (!event.startsAt) {
+    return false;
+  }
+
+  const startsAt = new Date(event.startsAt);
+
+  if (Number.isNaN(startsAt.getTime())) {
+    return false;
+  }
+
+  return startsAt >= from && startsAt <= to;
 }
 
 function Stepper({
@@ -151,6 +200,13 @@ export default function HomeScreen() {
   const [placesError, setPlacesError] = useState('');
   const [events, setEvents] = useState<ExperienceFeedEvent[]>([]);
   const [eventsError, setEventsError] = useState('');
+  const [activeEvent, setActiveEvent] =
+    useState<ExperienceFeedEvent | null>(null);
+  const [eventDetailError, setEventDetailError] = useState('');
+  const [eventFilter, setEventFilter] =
+    useState<EventFilter>('all');
+  const [eventSort, setEventSort] =
+    useState<EventSort>('date');
   const [usedRadiusKm, setUsedRadiusKm] = useState<number | null>(null);
   const [savedTips, setSavedTips] = useState<string[]>([]);
   const [activePlace, setActivePlace] =
@@ -217,6 +273,50 @@ export default function HomeScreen() {
     adults >= 1 &&
     childrenCount >= 1 &&
     childrenAges.length === childrenCount;
+
+  const visibleEvents = events
+    .filter((event) => {
+      const now = new Date();
+
+      if (eventFilter === 'today') {
+        return isEventInRange(
+          event,
+          startOfDay(now),
+          endOfDay(now),
+        );
+      }
+
+      if (eventFilter === 'weekend') {
+        const { saturday, sunday } = getWeekendRange(now);
+        return isEventInRange(event, saturday, sunday);
+      }
+
+      if (eventFilter === 'free') {
+        return event.freeEntry || event.priceMin === 0;
+      }
+
+      return true;
+    })
+    .sort((first, second) => {
+      if (eventSort === 'distance') {
+        const firstDistance = first.distanceKm ?? Number.MAX_VALUE;
+        const secondDistance = second.distanceKm ?? Number.MAX_VALUE;
+        const distanceDifference = firstDistance - secondDistance;
+
+        if (distanceDifference !== 0) {
+          return distanceDifference;
+        }
+      }
+
+      const firstDate = first.startsAt
+        ? new Date(first.startsAt).getTime()
+        : Number.MAX_VALUE;
+      const secondDate = second.startsAt
+        ? new Date(second.startsAt).getTime()
+        : Number.MAX_VALUE;
+
+      return firstDate - secondDate;
+    });
 
   function updateChildrenCount(nextValue: number) {
     const safeValue = Math.min(6, Math.max(1, nextValue));
@@ -312,16 +412,28 @@ export default function HomeScreen() {
     return 'Cena na webe';
   }
 
+  function handleOpenEventDetail(event: ExperienceFeedEvent) {
+    setActiveEvent(event);
+    setEventDetailError('');
+    setStep('eventDetail');
+  }
+
   async function handleOpenEvent(event: ExperienceFeedEvent) {
+    setEventDetailError('');
+
     if (!event.purchaseUrl) {
-      setEventsError('Oficiálny odkaz na podujatie zatiaľ chýba.');
+      setEventDetailError(
+        'Oficiálny odkaz na podujatie zatiaľ chýba.',
+      );
       return;
     }
 
     try {
       await Linking.openURL(event.purchaseUrl);
     } catch {
-      setEventsError('Odkaz na podujatie sa nepodarilo otvoriť.');
+      setEventDetailError(
+        'Odkaz na podujatie sa nepodarilo otvoriť.',
+      );
     }
   }
 
@@ -393,6 +505,9 @@ export default function HomeScreen() {
     setPlacesLoading(true);
     setPlacesError('');
     setEventsError('');
+    setEventDetailError('');
+    setEventFilter('all');
+    setEventSort('date');
 
     try {
       const cityDetails = await getCityDetails(
@@ -465,6 +580,140 @@ export default function HomeScreen() {
     }
   }
 
+
+  if (step === 'eventDetail' && activeEvent) {
+    return (
+      <View style={styles.root}>
+        <StatusBar style="dark" />
+        <SummerBackground />
+
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView
+            contentContainerStyle={styles.detailContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Pressable
+              onPress={() => setStep('results')}
+              style={styles.backButton}
+            >
+              <Text style={styles.backButtonText}>
+                ← Späť na podujatia
+              </Text>
+            </Pressable>
+
+            <View style={styles.eventDetailHero}>
+              <View style={styles.eventDetailEmojiBox}>
+                <Text style={styles.eventDetailEmoji}>
+                  {activeEvent.emoji || '🎪'}
+                </Text>
+              </View>
+
+              <Text style={styles.eventDetailDate}>
+                {formatEventDate(activeEvent)}
+              </Text>
+
+              <Text style={styles.detailTitle}>
+                {activeEvent.title}
+              </Text>
+
+              <Text style={styles.detailAddress}>
+                {activeEvent.venueName || activeEvent.city || 'Miesto bude doplnené'}
+                {activeEvent.city && activeEvent.venueName
+                  ? ` • ${activeEvent.city}`
+                  : ''}
+              </Text>
+
+              <View style={styles.eventDetailTagsRow}>
+                <Text style={styles.eventCategory}>
+                  {activeEvent.categoryName || 'Rodinné podujatie'}
+                </Text>
+                <Text
+                  style={[
+                    styles.eventDetailPrice,
+                    activeEvent.freeEntry && styles.eventPriceFree,
+                  ]}
+                >
+                  {formatEventPrice(activeEvent)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.eventDetailQuickRow}>
+              <View style={styles.eventDetailQuickCard}>
+                <Text style={styles.detailQuickIcon}>📍</Text>
+                <Text style={styles.detailQuickLabel}>Vzdialenosť</Text>
+                <Text style={styles.detailQuickValue}>
+                  {activeEvent.distanceKm !== null
+                    ? `${activeEvent.distanceKm} km`
+                    : 'Neznáma'}
+                </Text>
+              </View>
+
+              <View style={styles.eventDetailQuickCard}>
+                <Text style={styles.detailQuickIcon}>🎟️</Text>
+                <Text style={styles.detailQuickLabel}>Vstupné</Text>
+                <Text style={styles.detailQuickValue}>
+                  {formatEventPrice(activeEvent)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.detailSection}>
+              <Text style={styles.detailSectionTitle}>
+                O podujatí
+              </Text>
+              <Text style={styles.detailSectionText}>
+                {activeEvent.summary ||
+                  'Organizátor zatiaľ neposkytol podrobnejší popis. Aktuálne informácie nájdeš na oficiálnej stránke podujatia.'}
+              </Text>
+            </View>
+
+            <View style={styles.detailSection}>
+              <Text style={styles.detailSectionTitle}>
+                Kedy a kde
+              </Text>
+              <Text style={styles.detailSectionText}>
+                📅 {formatEventDate(activeEvent)}
+              </Text>
+              <Text style={styles.detailSectionText}>
+                📍 {activeEvent.venueName || activeEvent.city || 'Miesto bude doplnené'}
+              </Text>
+              {activeEvent.city && activeEvent.venueName && (
+                <Text style={styles.detailMutedText}>
+                  {activeEvent.city}
+                  {activeEvent.region ? `, ${activeEvent.region}` : ''}
+                </Text>
+              )}
+            </View>
+
+            {eventDetailError.length > 0 && (
+              <Text style={styles.feedErrorText}>
+                {eventDetailError}
+              </Text>
+            )}
+
+            <View style={styles.detailActions}>
+              <Pressable
+                disabled={!activeEvent.purchaseUrl}
+                onPress={() => handleOpenEvent(activeEvent)}
+                style={[
+                  styles.eventDetailPrimaryButton,
+                  !activeEvent.purchaseUrl &&
+                    styles.eventDetailPrimaryButtonDisabled,
+                ]}
+              >
+                <Text style={styles.primaryActionText}>
+                  {activeEvent.purchaseUrl
+                    ? 'Otvoriť oficiálny detail alebo lístky'
+                    : 'Oficiálny odkaz zatiaľ chýba'}
+                </Text>
+              </Pressable>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   if (step === 'detail' && activePlace) {
     const isSaved = savedTips.includes(activePlace.placeId);
@@ -908,21 +1157,95 @@ export default function HomeScreen() {
               </Text>
             )}
 
-            {events.length === 0 ? (
+            {events.length > 0 && (
+              <>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.eventFiltersRow}
+                >
+                  {([
+                    ['all', 'Všetky'],
+                    ['today', 'Dnes'],
+                    ['weekend', 'Tento víkend'],
+                    ['free', 'Zadarmo'],
+                  ] as const).map(([value, label]) => (
+                    <Pressable
+                      key={value}
+                      onPress={() => setEventFilter(value)}
+                      style={[
+                        styles.eventFilterChip,
+                        eventFilter === value &&
+                          styles.eventFilterChipActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.eventFilterChipText,
+                          eventFilter === value &&
+                            styles.eventFilterChipTextActive,
+                        ]}
+                      >
+                        {label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+
+                <View style={styles.eventSortRow}>
+                  <Text style={styles.eventResultCount}>
+                    {visibleEvents.length}{' '}
+                    {visibleEvents.length === 1
+                      ? 'podujatie'
+                      : 'podujatí'}
+                  </Text>
+
+                  <Pressable
+                    onPress={() =>
+                      setEventSort((currentSort) =>
+                        currentSort === 'date'
+                          ? 'distance'
+                          : 'date',
+                      )
+                    }
+                    style={styles.eventSortButton}
+                  >
+                    <Text style={styles.eventSortButtonText}>
+                      {eventSort === 'date'
+                        ? 'Najskôr'
+                        : 'Najbližšie'} ↕
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
+
+            {visibleEvents.length === 0 ? (
               <View style={styles.feedEmptyCard}>
                 <Text style={styles.feedEmptyEmoji}>📅</Text>
                 <View style={styles.feedEmptyTextBox}>
                   <Text style={styles.feedEmptyTitle}>
-                    V tomto okruhu zatiaľ nemáme aktuálnu akciu
+                    {events.length === 0
+                      ? 'V tomto okruhu zatiaľ nemáme aktuálnu akciu'
+                      : 'Tomuto filtru nezodpovedá žiadne podujatie'}
                   </Text>
                   <Text style={styles.feedEmptyText}>
-                    Trvalé výlety nižšie sú stále k dispozícii.
+                    {events.length === 0
+                      ? 'Trvalé výlety nižšie sú stále k dispozícii.'
+                      : 'Skús zvoliť Všetky alebo iný filter.'}
                   </Text>
                 </View>
               </View>
             ) : (
-              events.map((event) => (
-                <View key={event.id} style={styles.eventCard}>
+              visibleEvents.map((event) => (
+                <Pressable
+                  key={event.id}
+                  onPress={() => handleOpenEventDetail(event)}
+                  style={({ pressed }) => [
+                    styles.eventCard,
+                    pressed && styles.eventCardPressed,
+                  ]}
+                >
                   <View style={styles.eventDateBadge}>
                     <Text style={styles.eventDateEmoji}>
                       {event.emoji || '🎪'}
@@ -960,16 +1283,13 @@ export default function HomeScreen() {
                       </Text>
                     </View>
 
-                    <Pressable
-                      onPress={() => handleOpenEvent(event)}
-                      style={styles.eventOpenButton}
-                    >
+                    <View style={styles.eventOpenButton}>
                       <Text style={styles.eventOpenButtonText}>
-                        Otvoriť detail alebo lístky →
+                        Zobraziť podrobnosti →
                       </Text>
-                    </Pressable>
+                    </View>
                   </View>
-                </View>
+                </Pressable>
               ))
             )}
 
@@ -2064,6 +2384,53 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     marginTop: 3,
   },
+  eventFiltersRow: {
+    paddingRight: 8,
+    paddingBottom: 10,
+  },
+  eventFilterChip: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderColor: '#D8C6E8',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    marginRight: 8,
+  },
+  eventFilterChipActive: {
+    backgroundColor: '#7F4AA5',
+    borderColor: '#7F4AA5',
+  },
+  eventFilterChipText: {
+    color: '#704494',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  eventFilterChipTextActive: {
+    color: '#FFFFFF',
+  },
+  eventSortRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  eventResultCount: {
+    color: '#5F7684',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  eventSortButton: {
+    backgroundColor: '#F3E9FF',
+    borderRadius: 11,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+  },
+  eventSortButtonText: {
+    color: '#704494',
+    fontSize: 12,
+    fontWeight: '900',
+  },
   eventCard: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.97)',
@@ -2078,6 +2445,10 @@ const styles = StyleSheet.create({
       width: 0,
       height: 6,
     },
+  },
+  eventCardPressed: {
+    opacity: 0.82,
+    transform: [{ scale: 0.99 }],
   },
   eventDateBadge: {
     width: 55,
@@ -2148,6 +2519,72 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '900',
+  },
+
+  eventDetailHero: {
+    backgroundColor: 'rgba(255,255,255,0.97)',
+    borderRadius: 24,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 5,
+    marginBottom: 16,
+  },
+  eventDetailEmojiBox: {
+    width: 86,
+    height: 86,
+    borderRadius: 25,
+    backgroundColor: '#F3E9FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  eventDetailEmoji: {
+    fontSize: 44,
+  },
+  eventDetailDate: {
+    color: '#8B4BB0',
+    fontSize: 13,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  eventDetailTagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 14,
+  },
+  eventDetailPrice: {
+    color: '#164761',
+    fontSize: 14,
+    fontWeight: '900',
+    marginLeft: 10,
+  },
+  eventDetailQuickRow: {
+    flexDirection: 'row',
+    marginHorizontal: -5,
+    marginBottom: 2,
+  },
+  eventDetailQuickCard: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: 18,
+    padding: 15,
+    marginHorizontal: 5,
+    elevation: 3,
+  },
+  eventDetailPrimaryButton: {
+    backgroundColor: '#7F4AA5',
+    borderRadius: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  eventDetailPrimaryButtonDisabled: {
+    backgroundColor: '#AFA2B7',
+    opacity: 0.7,
   },
 
   savedCounter: {
