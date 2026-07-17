@@ -1,0 +1,528 @@
+﻿{
+    "action":  "preview",
+    "version":  "municipal-quality-v2",
+    "sources":  {
+                    "bb-events":  {
+                                      "adapter":  "citio_detail",
+                                      "listUrl":  "https://www.banskabystrica.sk/podujatia/",
+                                      "discoveredLinks":  1,
+                                      "parsedCandidates":  1,
+                                      "accepted":  1,
+                                      "rejected":  0,
+                                      "errors":  [
+
+                                                 ]
+                                  },
+                    "bojnice-events":  {
+                                           "adapter":  "webygroup_listing",
+                                           "listUrl":  "https://www.bojnice.sk/kulturne-a-sportove-akcie-0.html",
+                                           "discoveredLinks":  0,
+                                           "parsedCandidates":  6,
+                                           "accepted":  6,
+                                           "rejected":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                    "bs-kultura":  {
+                                       "adapter":  "ticketware_detail",
+                                       "listUrl":  "https://www.kultura.banskastiavnica.sk/",
+                                       "discoveredLinks":  3,
+                                       "parsedCandidates":  3,
+                                       "accepted":  3,
+                                       "rejected":  0,
+                                       "errors":  [
+
+                                                  ]
+                                   },
+                    "zvolen-events":  {
+                                          "adapter":  "webygroup_listing",
+                                          "listUrl":  "https://www.zvolen.sk/aktualne-podujatia.html",
+                                          "discoveredLinks":  0,
+                                          "parsedCandidates":  4,
+                                          "accepted":  4,
+                                          "rejected":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      }
+                },
+    "stats":  {
+                  "sourceCount":  4,
+                  "acceptedBeforeDedupe":  14,
+                  "afterDedupe":  14,
+                  "rejected":  0,
+                  "rejectedReasons":  {
+
+                                      },
+                  "quality80Plus":  14
+              },
+    "preview":  [
+                    {
+                        "sourceCode":  "bojnice_events",
+                        "sourcePageCode":  "bojnice-events",
+                        "sourceUrl":  "https://www.bojnice.sk/akcia/safranove-leto-v-bojniciach-2026/mid/468786/.html",
+                        "externalId":  "fc119e6f6a634bf3d13ed0541b9dd10fe1ea94393e32f543da43f2bb5a95a264",
+                        "title":  "Šafranové leto v Bojniciach 2026",
+                        "summary":  "Bojnická kultúra je ako šafran. Voňavá, chutná a jedinečná! Príďte okoštovať aj tento rok! Bližšie informácie o termínoch jednotlivých podujatí nájdete na ideovom plagáte k podujatiu. Viac informácií nájdete už čoskoro na našom webe, sociálnych sieťach a na výlepných plochách v meste. Tešíme sa na vašu návštevu! 12.6. - 20.9.2026 informácie na plagáte",
+                        "description":  "Šafranové leto v Bojniciach 2026 Bojnická kultúra je ako šafran. Voňavá, chutná a jedinečná! Príďte okoštovať aj tento rok! Bližšie informácie o termínoch jednotlivých podujatí nájdete na ideovom plagáte k podujatiu. Viac informácií nájdete už čoskoro na našom webe, sociálnych sieťach a na výlepných plochách v meste. Tešíme sa na vašu návštevu! 12.6. - 20.9.2026 informácie na plagáte",
+                        "startDate":  "2026-06-12T12:00:00+02:00",
+                        "endDate":  "2026-09-20T23:59:00+02:00",
+                        "allDay":  true,
+                        "city":  "Bojnice",
+                        "region":  "Trenčiansky kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.bojnice.sk/portals_pictures/i_008612/i_8612465.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.bojnice.sk/akcia/safranove-leto-v-bojniciach-2026/mid/468786/.html",
+                        "qualityScore":  90,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "Šafranové leto v Bojniciach 2026 Bojnická kultúra je ako šafran. Voňavá, chutná a jedinečná! Príďte okoštovať aj tento rok! Bližšie informácie o termínoch jednotlivých podujatí nájdete na ideovom plagáte k podujatiu. Viac informácií nájdete už čoskoro na našom webe, sociálnych sieťach a na výlepných plochách v meste. Tešíme sa na vašu návštevu! 12.6. - 20.9.2026 informácie na plagáte"
+                                }
+                    },
+                    {
+                        "sourceCode":  "bojnice_events",
+                        "sourcePageCode":  "bojnice-events",
+                        "sourceUrl":  "https://www.bojnice.sk/akcia/lego-vystava-a-velka-herna/mid/468786/.html",
+                        "externalId":  "ad1259072bd60eb685203acc409eaa0ea20aa8cf53d6ae1099925de836788ba6",
+                        "title":  "LEGO výstava a veľká herňa",
+                        "summary":  "od 19. júna do 31. augusta 2026 / Kongresová sála KC Bojnice Pozývame vás na LEGO výstavu, súčasťou ktorej bude aj veľká herňa s kockami tejto najpopulárnejšej stavebnice sveta. Tešiť sa môžete nielen na Lego Avatar, Jurský park, Lego Friends City, Lego Space, Pán prsteňov, Lego Dreamzzz, ale aj na 2. najväčší Harry Potter hrad NA SVETE! Dátum konania výstavy: od 19.6. do 31.8. vo Vestibule Kongresovej sály a v Kongresovej sále KC Bojnice. Otváracie hodiny: pondelok-nedeľa od 10.00 h do 18.00 h…",
+                        "description":  "LEGO výstava a veľká herňa od 19. júna do 31. augusta 2026 / Kongresová sála KC Bojnice Pozývame vás na LEGO výstavu, súčasťou ktorej bude aj veľká herňa s kockami tejto najpopulárnejšej stavebnice sveta. Tešiť sa môžete nielen na Lego Avatar, Jurský park, Lego Friends City, Lego Space, Pán prsteňov, Lego Dreamzzz, ale aj na 2. najväčší Harry Potter hrad NA SVETE! Dátum konania výstavy: od 19.6. do 31.8. vo Vestibule Kongresovej sály a v Kongresovej sále KC Bojnice. Otváracie hodiny: pondelok-nedeľa od 10.00 h do 18.00 h Vstupné: 6,00 € / osoba (vstupenky si môžete zakúpiť na mieste v hotovosti) 19.6. - 31.8.2026 v texte 6,00€",
+                        "startDate":  "2026-06-19T10:00:00+02:00",
+                        "endDate":  "2026-08-31T23:59:00+02:00",
+                        "allDay":  false,
+                        "city":  "Bojnice",
+                        "region":  "Trenčiansky kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.bojnice.sk/portals_pictures/i_008612/i_8612507.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  6,
+                        "priceMax":  6,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.bojnice.sk/akcia/lego-vystava-a-velka-herna/mid/468786/.html",
+                        "qualityScore":  100,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "LEGO výstava a veľká herňa od 19. júna do 31. augusta 2026 / Kongresová sála KC Bojnice Pozývame vás na LEGO výstavu, súčasťou ktorej bude aj veľká herňa s kockami tejto najpopulárnejšej stavebnice sveta. Tešiť sa môžete nielen na Lego Avatar, Jurský park, Lego Friends City, Lego Space, Pán prsteňov, Lego Dreamzzz, ale aj na 2. najväčší Harry Potter hrad NA SVETE! Dátum konania výstavy: od 19.6. do 31.8. vo Vestibule Kongresovej sály a v Kongresovej sále KC Bojnice. Otváracie hodiny: pondelok-nedeľa od 10.00 h do 18.00 h Vstupné: 6,00 € / osoba (vstupenky si môžete zakúpiť na mieste v hotovosti) 19.6. - 31.8.2026 v texte 6,00€"
+                                }
+                    },
+                    {
+                        "sourceCode":  "zvolen_events",
+                        "sourcePageCode":  "zvolen-events",
+                        "sourceUrl":  "https://www.zvolen.sk/akcia/marko-vrzgula-malba/mid/542191/.html",
+                        "externalId":  "9b28b53e6db1ba2733dc7b3c2452d4feca821c8ff4d803e7acabf08d970e0a31",
+                        "title":  "Marko Vrzgula - maľba",
+                        "summary":  "2.7. - 31.8.2026 .",
+                        "description":  "Marko Vrzgula - maľba 2.7. - 31.8.2026 .",
+                        "startDate":  "2026-07-02T12:00:00+02:00",
+                        "endDate":  "2026-08-31T23:59:00+02:00",
+                        "allDay":  true,
+                        "city":  "Zvolen",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.zvolen.sk/portals_pictures/i_008678/i_8678595.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.zvolen.sk/akcia/marko-vrzgula-malba/mid/542191/.html",
+                        "qualityScore":  83,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "Marko Vrzgula - maľba 2.7. - 31.8.2026 ."
+                                }
+                    },
+                    {
+                        "sourceCode":  "zvolen_events",
+                        "sourcePageCode":  "zvolen-events",
+                        "sourceUrl":  "https://www.zvolen.sk/akcia/zvolensky-vytvarny-salon-7/mid/542191/.html",
+                        "externalId":  "e4c1399cbaf839846030ba9f099292bef190c3ba512b3f494f3d187a45ea504d",
+                        "title":  "Zvolenský výtvarný salón",
+                        "summary":  "Vernisáž 3. 7. 2026 o 17:00 hod. 3.7. - 28.8.2026 .",
+                        "description":  "Zvolenský výtvarný salón Vernisáž 3. 7. 2026 o 17:00 hod. 3.7. - 28.8.2026 .",
+                        "startDate":  "2026-07-03T17:00:00+02:00",
+                        "endDate":  "2026-08-28T23:59:00+02:00",
+                        "allDay":  false,
+                        "city":  "Zvolen",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.zvolen.sk/portals_pictures/i_008678/i_8678772.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.zvolen.sk/akcia/zvolensky-vytvarny-salon-7/mid/542191/.html",
+                        "qualityScore":  83,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "Zvolenský výtvarný salón Vernisáž 3. 7. 2026 o 17:00 hod. 3.7. - 28.8.2026 ."
+                                }
+                    },
+                    {
+                        "sourceCode":  "zvolen_events",
+                        "sourcePageCode":  "zvolen-events",
+                        "sourceUrl":  "https://www.zvolen.sk/akcia/osobne-doklady-a-ine-verejne-listiny-v-zivote-obcana/mid/542191/.html",
+                        "externalId":  "ad5e5476fd4f65da03460e508ee6980d61ade18158c5482d0183ead6330f74c4",
+                        "title":  "Osobné doklady a iné verejné listiny v živote občana",
+                        "summary":  "Historický vývoj osobných dokladov v kontexte 130. výročia zoštátnenia matrík. 6. - 24.7.2026 Pon. - Pia.: 8.00 - 16.30 hod.",
+                        "description":  "Osobné doklady a iné verejné listiny v živote občana Historický vývoj osobných dokladov v kontexte 130. výročia zoštátnenia matrík. 6. - 24.7.2026 Pon. - Pia.: 8.00 - 16.30 hod.",
+                        "startDate":  "2026-07-06T08:00:00+02:00",
+                        "endDate":  "2026-07-24T23:59:00+02:00",
+                        "allDay":  false,
+                        "city":  "Zvolen",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.zvolen.sk/portals_pictures/i_008689/i_8689492.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.zvolen.sk/akcia/osobne-doklady-a-ine-verejne-listiny-v-zivote-obcana/mid/542191/.html",
+                        "qualityScore":  90,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "Osobné doklady a iné verejné listiny v živote občana Historický vývoj osobných dokladov v kontexte 130. výročia zoštátnenia matrík. 6. - 24.7.2026 Pon. - Pia.: 8.00 - 16.30 hod."
+                                }
+                    },
+                    {
+                        "sourceCode":  "zvolen_events",
+                        "sourcePageCode":  "zvolen-events",
+                        "sourceUrl":  "https://www.zvolen.sk/akcia/zvolensky-cestovatelsky-festival-0/mid/542191/.html",
+                        "externalId":  "cea372d6c7e24bd4858074c2b35d556bea53eaaaa7c838e0d05d83690a1712c0",
+                        "title":  "Zvolenský cestovateľský festival",
+                        "summary":  "16. - 18.7.2026 o od 17:30 hod. h Vstup voľný",
+                        "description":  "Zvolenský cestovateľský festival 16. - 18.7.2026 o od 17:30 hod. h Vstup voľný",
+                        "startDate":  "2026-07-16T17:30:00+02:00",
+                        "endDate":  "2026-07-18T23:59:00+02:00",
+                        "allDay":  false,
+                        "city":  "Zvolen",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.zvolen.sk/portals_pictures/i_008689/i_8689504.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.zvolen.sk/akcia/zvolensky-cestovatelsky-festival-0/mid/542191/.html",
+                        "qualityScore":  83,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "Zvolenský cestovateľský festival 16. - 18.7.2026 o od 17:30 hod. h Vstup voľný"
+                                }
+                    },
+                    {
+                        "sourceCode":  "bojnice_events",
+                        "sourcePageCode":  "bojnice-events",
+                        "sourceUrl":  "https://www.bojnice.sk/akcia/12--rocnik-multi-art-bojnice-2026/mid/468786/.html",
+                        "externalId":  "c3bd6819d35e0d16f0227edd01e7f50fc6a279b8d2d3e25d9e02ee8c1d0554f9",
+                        "title":  "12. ROČNÍK MULTI ART BOJNICE 2026",
+                        "summary":  "Na 12. ročníku multikultúrneho festivalu MULTI ART BOJNICE 2026 24. 25. a 26. júla 2026 sa Vám predstavia umeleckí remeselníci z oblasti keramiky, kože, kovu, šperkov, textilných originálov, obrazov, hračiek a podobne. Súčasťou sú aj tvorivé dielne pre deti, predvádzanie remesiel, hena, pouličné umenie, domáce gastro produkty ako džemy, medy, ovocinár Hrehor, prírodná kozmetika a mnoho iných zaujímavých remeselných a domácich produktov. Súčasťou je už tradične sobotná LATINO TANCOVAČKA s animác…",
+                        "description":  "12. ROČNÍK MULTI ART BOJNICE 2026 Na 12. ročníku multikultúrneho festivalu MULTI ART BOJNICE 2026 24. 25. a 26. júla 2026 sa Vám predstavia umeleckí remeselníci z oblasti keramiky, kože, kovu, šperkov, textilných originálov, obrazov, hračiek a podobne. Súčasťou sú aj tvorivé dielne pre deti, predvádzanie remesiel, hena, pouličné umenie, domáce gastro produkty ako džemy, medy, ovocinár Hrehor, prírodná kozmetika a mnoho iných zaujímavých remeselných a domácich produktov. Súčasťou je už tradične sobotná LATINO TANCOVAČKA s animáciami Cubano project Prievidza, maliarske sympózium a dobové módne prehliadky odevov 19. storočia. Občerstvenie sladké aj slané a výborné pivko z Panského pivovaru Bojnice, teším sa na Vás organizátor Dušan Maliarik 24. - 26.7.2026 v texte",
+                        "startDate":  "2026-07-24T12:00:00+02:00",
+                        "endDate":  "2026-07-26T23:59:00+02:00",
+                        "allDay":  true,
+                        "city":  "Bojnice",
+                        "region":  "Trenčiansky kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.bojnice.sk/portals_pictures/i_008632/i_8632598.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.bojnice.sk/akcia/12--rocnik-multi-art-bojnice-2026/mid/468786/.html",
+                        "qualityScore":  90,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "12. ROČNÍK MULTI ART BOJNICE 2026 Na 12. ročníku multikultúrneho festivalu MULTI ART BOJNICE 2026 24. 25. a 26. júla 2026 sa Vám predstavia umeleckí remeselníci z oblasti keramiky, kože, kovu, šperkov, textilných originálov, obrazov, hračiek a podobne. Súčasťou sú aj tvorivé dielne pre deti, predvádzanie remesiel, hena, pouličné umenie, domáce gastro produkty ako džemy, medy, ovocinár Hrehor, prírodná kozmetika a mnoho iných zaujímavých remeselných a domácich produktov. Súčasťou je už tradične sobotná LATINO TANCOVAČKA s animáciami Cubano project Prievidza, maliarske sympózium a dobové módne prehliadky odevov 19. storočia. Občerstvenie sladké aj slané a výborné pivko z Panského pivovaru Bojnice, teším sa na Vás organizátor Dušan Maliarik 24. - 26.7.2026 v texte"
+                                }
+                    },
+                    {
+                        "sourceCode":  "banska_bystrica_events",
+                        "sourcePageCode":  "bb-events",
+                        "sourceUrl":  "https://www.banskabystrica.sk/podujatia/komentovane-prehliadky-kostolov-2/",
+                        "externalId":  "abd552bdadcdc7138c48351d33c2a5cc90ac47b2af90b1c88dc87e712a3e56e0",
+                        "title":  "Červené zlato",
+                        "summary":  "Pozývame Vás na letné prehliadky kostolov, ktoré sa konajú každý druhý piatok so začiatkom o 17:30 h. Tento rok zaraďujeme do programu aj novinku – Kostol sv. Alžbety Uhorskej, tzv. Špitálsky kostol na Dolnej ulici v Banskej Bystrici. V rámci kostolov v hradnom areáli navštívime Kostol Nanebovzatia Panny Márie a Kostol sv. Kríža. Termíny: 24. 07. 2026 Kostol […]",
+                        "description":  "Kategórie podujatí Komentované prehliadky kostolov 24. júla 2026, 17:30 — , 19:00 Tweet Pozývame Vás na letné prehliadky kostolov, ktoré sa konajú každý druhý piatok so začiatkom o 17:30 h. Tento rok zaraďujeme do programu aj novinku – Kostol sv. Alžbety Uhorskej, tzv. Špitálsky kostol na Dolnej ulici v Banskej Bystrici. V rámci kostolov v hradnom areáli navštívime Kostol Nanebovzatia Panny Márie a Kostol sv. Kríža. Termíny: 24. 07. 2026 Kostol sv. Alžbety Uhorskej. Stretnutie: pred Kostolom sv. Alžbety, Dolná 49 14. 08. 2026 Kostol sv. Alžbety Uhorskej. Stretnutie: pred Kostolom sv. Alžbety, Dolná 49 28. 08. 2026 Kostoly v hradnom areáli. Stretnutie: pred kostolom Nanebovzatia Panny Márie Vstupné: 4€/osoba. Deti do 6 rokov a ŤZP zadarmo. Lístky je možné zakúpiť vopred v Turistickom informačnom centre, Námestie SNP 1 (Budova Radnice) alebo na mieste. Informácie Navigovať na mape Dolná 49, Banská Bystrica Galéria Tweet Podobné Červené zlato 22. apríla — 15. mája 2027 Pomoc pre HAVKÁČOV 6. mája — 31. augusta 2026 Prázdniny s remeslom 6. júla — 7. augusta 2026 Všetko",
+                        "startDate":  "2026-07-24T17:30:00+02:00",
+                        "endDate":  null,
+                        "allDay":  false,
+                        "city":  "Banská Bystrica",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  "Námestie SNP 1 (Budova Radnice) alebo na mieste",
+                        "imageUrl":  "https://mestobbweb01storage.blob.core.windows.net/production/2026/06/hlavny-oltar-s-obrazom-od-J.L.Krackera-scaled.jpg",
+                        "freeEntry":  true,
+                        "priceMin":  0,
+                        "priceMax":  0,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.banskabystrica.sk/podujatia/komentovane-prehliadky-kostolov-2/",
+                        "qualityScore":  100,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "html-detail",
+                        "raw":  {
+                                    "parser":  "html-detail",
+                                    "textSample":  "Kategórie podujatí Komentované prehliadky kostolov 24. júla 2026, 17:30 — , 19:00 Tweet Pozývame Vás na letné prehliadky kostolov, ktoré sa konajú každý druhý piatok so začiatkom o 17:30 h. Tento rok zaraďujeme do programu aj novinku – Kostol sv. Alžbety Uhorskej, tzv. Špitálsky kostol na Dolnej ulici v Banskej Bystrici. V rámci kostolov v hradnom areáli navštívime Kostol Nanebovzatia Panny Márie a Kostol sv. Kríža. Termíny: 24. 07. 2026 Kostol sv. Alžbety Uhorskej. Stretnutie: pred Kostolom sv. Alžbety, Dolná 49 14. 08. 2026 Kostol sv. Alžbety Uhorskej. Stretnutie: pred Kostolom sv. Alžbety, Dolná 49 28. 08. 2026 Kostoly v hradnom areáli. Stretnutie: pred kostolom Nanebovzatia Panny Márie Vstupné: 4€/osoba. Deti do 6 rokov a ŤZP zadarmo. Lístky je možné zakúpiť vopred v Turistickom informačnom centre, Námestie SNP 1 (Budova Radnice) alebo na mieste. Informácie Navigovať na mape Dolná 49, Banská Bystrica Galéria Tweet Podobné Červené zlato 22. apríla — 15. mája 2027 Pomoc pre HAVKÁČOV 6. mája — 31. augusta 2026 Prázdniny s remeslom 6. júla — 7. augusta 2026 Všetko"
+                                }
+                    },
+                    {
+                        "sourceCode":  "banska_stiavnica_kultura",
+                        "sourcePageCode":  "bs-kultura",
+                        "sourceUrl":  "https://www.kultura.banskastiavnica.sk/event/835260/nezabudnute-remesla-2026",
+                        "externalId":  "cf12b48ff76cbeebb5be74a710e55de6131d45bf169f84bf3770f8696402035f",
+                        "title":  "Nezabudnuté remeslá 2026",
+                        "summary":  "Kompletný program, vstupenky online, kontakt a všetky informácie o Kultúrne centrum Banská Štiavnica",
+                        "description":  "kultura@banskastiavnica.sk 045/6949651 kultura@banskastiavnica.sk 045/6949651 prepnut_navigaciu ÚVOD O NÁS Organizačné zaradenie Referencie Pre umelcov Kontakty Mapa stránok Všeobecné obchodné podmienky PODUJATIA Program Zimomravenie Štiavnický živý šach Nezabudnuté remeslá Salamandrové dni Kultúrne leto s Bod K. Galéria Stojiská Online Výstavy SLUŽBY Prenájmy Výlepy plagátov Mestský rozhlas Výstavné priestory Štiavnické noviny Kino Akademik REMESELNÉ TRHY Poplatky Registrácia MIESTA Kultúrne centrum Kino Akademik Knižnica Klub Rubigall Bod K. Výmenník VSTUPENKA V MOBILE BudíCheck mailTicket Nezabudnuté remeslá 2026 Ďalší ročník festivalu sa bude venovať regiónu HontNajväčší ľudovoumelecký a remeslný jarmok v Banskej Štiavnici za účasti stovky predajcov.Vystúpia:FS HONT Krupina // FSK Prenčovan // DFS Širinka // Dfs Geľovianka Sebechleby // Mgr. Erik Koncz, PhD. (OZ HONT a jeho dejiny)OZ Zlatá cesta // Divadlo Ramagu, o.z. // Mlykovo drevené divadlo // Tvorivé dielne s Mimou // Štiavnická muzika // Katarína Nádaská // ForgiProjekt z verejných zdrojov podporil Fond na podporu umenia.Dĺžka podujatia: 480 minút Uvedieme: Kliknutím na dátum alebo čas zobrazíte podrobnosti predstavenia Tweet Sobota, 1. 8. o 10:00 Banská Štiavnica Názov: Nezabudnuté remeslá 2026 Cena: 0,00 € Miesto: Banská Štiavnica Námestie sv. Trojice 969 01 Banská Štiavnica Zobraziť na mape VŠEOBECNÉ OBCHODNÉ PODMIENKY I.Úvodné ustanovenia Tieto Všeobecné obchodné podmienky (ďalej len „VOP“) sa vzťahujú na predaj a postup predaja vstupeniek na kultúrne podujatia realizované Mestom Banská Štiavnica. II.Vstupenky 1. Vstupenka je cenina a potvrdenie umožňujúce jej majiteľovi za poplatok (spravidla jednorazový) vstup na Podujatie, na ktoré bola zakúpená. Vstupenka je zakúpená, a zároveň vytlačená v pokladniach prevádzky prevádzkovaných Prevádzkovateľom, a to kina Akademik alebo Kultúrneho centra (ďalej len „Prevádzok“).2. mailTicket“ je vstupenka zakúpená prostredníctvom internetovej stránky www.banskastiavnica.sk/kino aleboo www.banskastiavnica.sk/kultura a jej podstránok pre jednotlivé Prevádzky, a to: s unikátnym čiarovým kódom, vytlačená Zákazníkom, alebo vstupenka vo formáte PDF s unikátnym čiarovým kódom predložená Zákazníkom uvádzačovi pred vstupom do Prevádzky prostredníctvom prenosného elektronického zariadenia (mobilným telefónom, tabletom a pod.). Vstupenka s unikátnym čiarovým kódom je súčasťou potvrdzujúceho e-mailu, ktorý bude doručený Zákazníkovi vždy po objednaní a úhrade vstupenky cez internetovú stránku, z ktorej vykonal objednávku. Čiarovým kódom sa Zákazník preukáže pred vstupom do sály alebo na konkrétne predstavenie. Možno ho naskenovať z mobilného zariadenia alebo predložiť vo vytlačenej forme. Kód musí byť čitateľný a nepoškodený. Zákazník preberá zodpovednosť za nešírenie vstupenky, aby tak zabránil jej prípadnému zneužitiu.3. Podujatie je kultúrna aktivita, ktorú pripravuje Organizátor. Kultúrne podujatie je spravidla kino podujatie, divadelné podujatie, koncert, festival alebo iná kultúrna aktivita, pripravovaná pre verejnosť.4. Organizátor (podujatia) je Mesto Banská Štiavnica, Radničné námestie 1, Banská Štiavnica, IČO: 00320501. Na organizáciu podujatia využíva organizátor vlastných zamestnancov a externých spolupracovníkov a spoločnosti.5. Vstupenky sú podľa predpisov oslobodené od DPH. Upravovanie, falšovanie alebo kopírovanie vstupeniek je v rozpore s týmito VOP, ako aj príslušnými právnymi predpismi a môže vyvolať administratívnoprávne, ako aj trestnoprávne následky.6. Vstupenka bez kontrolného kupónu alebo inak úmyselne alebo neúmyselne poškodená je neplatná a jej majiteľovi nebude po predložení takejto vstupenky umožnený vstup na podujatie, ktorého sa vstupenka týka.7. Kúpou vstupenky zákazník berie na vedomie a akceptuje, že:a. vstup do hľadiska po začiatku podujatia je zakázaný v prípade, že je na propagačných materiáloch uvedené inak, alebo nejde o podujatie s dĺžkou viac ako tri hodiny; z tohto dôvodu sa odporúča prísť na podu…",
+                        "startDate":  "2026-08-01T10:00:00+02:00",
+                        "endDate":  null,
+                        "allDay":  false,
+                        "city":  "Banská Štiavnica",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  "Banská Štiavnica Námestie sv",
+                        "address":  "Námestie sv",
+                        "imageUrl":  null,
+                        "freeEntry":  false,
+                        "priceMin":  0,
+                        "priceMax":  0,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.kultura.banskastiavnica.sk/event/835260/nezabudnute-remesla-2026",
+                        "qualityScore":  92,
+                        "warnings":  [
+                                         "Chýba obrázok"
+                                     ],
+                        "canceled":  false,
+                        "parser":  "html-detail",
+                        "raw":  {
+                                    "parser":  "html-detail",
+                                    "textSample":  "kultura@banskastiavnica.sk 045/6949651 kultura@banskastiavnica.sk 045/6949651 prepnut_navigaciu ÚVOD O NÁS Organizačné zaradenie Referencie Pre umelcov Kontakty Mapa stránok Všeobecné obchodné podmienky PODUJATIA Program Zimomravenie Štiavnický živý šach Nezabudnuté remeslá Salamandrové dni Kultúrne leto s Bod K. Galéria Stojiská Online Výstavy SLUŽBY Prenájmy Výlepy plagátov Mestský rozhlas Výstavné priestory Štiavnické noviny Kino Akademik REMESELNÉ TRHY Poplatky Registrácia MIESTA Kultúrne centrum Kino Akademik Knižnica Klub Rubigall Bod K. Výmenník VSTUPENKA V MOBILE BudíCheck mailTicket Nezabudnuté remeslá 2026 Ďalší ročník festivalu sa bude venovať regiónu HontNajväčší ľudovoumelecký a remeslný jarmok v Banskej Štiavnici za účasti stovky predajcov.Vystúpia:FS HONT Krupina // FSK Prenčovan // DFS Širinka // Dfs Geľovianka Sebechleby // Mgr. Erik Koncz, PhD. (OZ HONT a jeho dejiny)OZ Zlatá cesta // Divadlo Ramagu, o.z. // Mlykovo drevené divadlo // Tvorivé dielne s Mimou // Štiavnická muzika // Katarína Nádaská // ForgiProjekt z verejných zdrojov podporil Fond na podporu umenia.Dĺžka podujatia: 480 minút Uvedieme: Kliknutím na dátum alebo čas zobrazíte podrobnosti predstavenia Tweet Sobota, 1. 8. o 10:00 Banská Štiavnica Názov: Nezabudnuté remeslá 2026 Cena: 0,00 € Miesto: Banská Štiavnica Námestie sv. Trojice 969 01 Banská Štiavnica Zobraziť na mape VŠEOBECNÉ OBCHODNÉ PODMIENKY I.Úvodné ustanovenia Tieto Všeobecné obchodné podmienky (ďalej len „VOP“) sa vzťahujú na predaj a postup predaja vstupeniek na kultúrne podujatia realizované Mestom Banská Štiavnica. II.Vstupenky 1. Vstupenka je cenina a potvrdenie umožňujúce jej majiteľovi za poplatok (spravidla jednorazový) vstup na Podujatie, na ktoré bola zakúpená. Vstupenka je zakúpená, a zároveň vytlačená v pokladniac…"
+                                }
+                    },
+                    {
+                        "sourceCode":  "bojnice_events",
+                        "sourcePageCode":  "bojnice-events",
+                        "sourceUrl":  "https://www.bojnice.sk/akcia/klimakterium-3-horuce-strely-vyrazaju-za-hranice-vsednych-dni/mid/468786/.html",
+                        "externalId":  "7a137d55d4d7390bed03f7cd81a0cb57ff16bbcb73212f50cad5ecb1d2a2f92f",
+                        "title":  "KLIMAKTÉRIUM 3 - HORÚCE STRELY VYRÁŽAJÚ ZA HRANICE VŠEDNÝCH DNÍ",
+                        "summary":  "slávny divadelný hit sa vracia na slovenské javiská – do tretice všetko najlepšie pokračovanie úspešnej komédie s pesničkami prichádza za vami Hrdinky zo seriálov „Sex v meste“ alebo „Zúfalé manželky“ to môžu zabaliť, keď na pódium vtrhnú naše štyri „klimakterické tigrice“. Dobre ich poznáte: Pamela, Žofia, Marika a Andrea. Vaše obľúbené hrdinky sú späť. Tentokrát chcú opustiť každodennú realitu a zabehnutú rutinu. V ústrety novým dobrodružstvám! Nie je to však také jednoduché... Sú neustále pr…",
+                        "description":  "KLIMAKTÉRIUM 3 - HORÚCE STRELY VYRÁŽAJÚ ZA HRANICE VŠEDNÝCH DNÍ slávny divadelný hit sa vracia na slovenské javiská – do tretice všetko najlepšie pokračovanie úspešnej komédie s pesničkami prichádza za vami Hrdinky zo seriálov „Sex v meste“ alebo „Zúfalé manželky“ to môžu zabaliť, keď na pódium vtrhnú naše štyri „klimakterické tigrice“. Dobre ich poznáte: Pamela, Žofia, Marika a Andrea. Vaše obľúbené hrdinky sú späť. Tentokrát chcú opustiť každodennú realitu a zabehnutú rutinu. V ústrety novým dobrodružstvám! Nie je to však také jednoduché... Sú neustále prenasledované mužmi. Manželom, milencom, trénerom, snúbencom, ex-partnerom, synom, priateľom, otcom, kolegom z práce... a Heňom. Ale ich túžba po zmene a odhodlanie niečo so svojím životom urobiť sú veľké. Kam sa vybrať? Chata, lyžovačka, kúpele, wellnes pobyt...? Nie! Ak zmena – tak poriadna! Ak si vyhodiť z kopýtka – tak parádne! Ich kroky smerujú na Malorku! Príďte sa aj vy odreagovať! Uvoľniť sa a slobodne sa smiať. Doprajte si pôžitok radosti, zábavy a dobrej nálady. Naše dámy však uviazli na letisku. Čakajú na svoj odlet – dovolenku snov. S viacerými tajomstvami a prekvapeniami. A popri tom čakaní postupne zabúdajú na rodinu, prácu, povinnosti... Spája ich neľahké obdobie ženy – menopauza s hormonálnym chaosom, nečakanými návalmi, telesnými a psychickými zmenami, obrovskou chuťou do jedla... Ale aj s krízou manželstva, rozpadom partnerských a rodinných väzieb, s rozhodnutím nájsť nový zmysel svojho života. Ale najmä s nezlomnou túžbou povzniesť sa. Vzlietnuť nad šedivú a ubíjajúcu realitu, zahodiť za hlavu svoje starosti. Predstavenie šťavnaté, svieže aj žensky drzé. Úprimné, pravdivo odvážne, trefne vtipné. Nenechajú sa odradiť nepriazňou osudu. Aj čakanie na letisku sa dá naplno prežiť. A užiť! Naše hrdinky sa smejú, zabávajú... Aj tie najvážnejšie témy a problémy riešia s nadhľadom a úsmevom. Aj vy spolu s nimi privrite na chvíľu oči a ocitnite sa na pieskovej pláži! Nechajte sa opájať šumom mora a šampanského... Unášať sa rytmami samby, nárazmi vĺn, vlnením roztancovaných bokov... Rozpálené telá, vášnivé pohľady, slastné pokušenia... Snívajte s nami! Ikonická inscenácia je sprevádzaná diváckym ošiaľom, srdečným potleskom a nadšeným jasotom. Predstaveniam dominuje nespútaná herecká energia. Dámske kvarteto otriasa sálami všade, kam príde. Chytí vás za srdce! Naplno rozvibruje bránice oslobodzujúcim a srdečným smiechom. Legendárnymi piesňami, ktoré všetci poznáme. Iskrivým humorom textov piesní a ich choreografií. Inscenácia, ktorá lieči pozitívnou energiou. Terapia humorom! hrajú: Zuzana TLUČKOVÁ – Gizka OŇOVÁ – Zuzana VAČKOVÁ / Lucia LAPIŠÁKOVÁ – Katarína BRYCHTOVÁ / Daniela KUFFELOVÁ / Jana VALOCKÁ texty piesní: Martin SARVAŠ, hudobná produkcia: Ľubo HORŇÁK, vokálne naštudovanie: Lenka PAULÍKOVÁ, pohybová spolupráca: Ivana ANTOLOVÁ, scéna: Tibor CSÓKA, Svetozár SPRUŠANSKÝ, kostýmy: Alexandra GRUSKOVÁ, réžia: Svetozár SPRUŠANSKÝ premiéry: 15. a 16. septembra 2026 20.9.2026 o 17:00 h 2…",
+                        "startDate":  "2026-09-20T17:00:00+02:00",
+                        "endDate":  null,
+                        "allDay":  false,
+                        "city":  "Bojnice",
+                        "region":  "Trenčiansky kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.bojnice.sk/portals_pictures/i_008630/i_8630348.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  26,
+                        "priceMax":  26,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.bojnice.sk/akcia/klimakterium-3-horuce-strely-vyrazaju-za-hranice-vsednych-dni/mid/468786/.html",
+                        "qualityScore":  100,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "KLIMAKTÉRIUM 3 - HORÚCE STRELY VYRÁŽAJÚ ZA HRANICE VŠEDNÝCH DNÍ slávny divadelný hit sa vracia na slovenské javiská – do tretice všetko najlepšie pokračovanie úspešnej komédie s pesničkami prichádza za vami Hrdinky zo seriálov „Sex v meste“ alebo „Zúfalé manželky“ to môžu zabaliť, keď na pódium vtrhnú naše štyri „klimakterické tigrice“. Dobre ich poznáte: Pamela, Žofia, Marika a Andrea. Vaše obľúbené hrdinky sú späť. Tentokrát chcú opustiť každodennú realitu a zabehnutú rutinu. V ústrety novým dobrodružstvám! Nie je to však také jednoduché... Sú neustále prenasledované mužmi. Manželom, milencom, trénerom, snúbencom, ex-partnerom, synom, priateľom, otcom, kolegom z práce... a Heňom. Ale ich túžba po zmene a odhodlanie niečo so svojím životom urobiť sú veľké. Kam sa vybrať? Chata, lyžovačka, kúpele, wellnes pobyt...? Nie! Ak zmena – tak poriadna! Ak si vyhodiť z kopýtka – tak parádne! Ich kroky smerujú na Malorku! Príďte sa aj vy odreagovať! Uvoľniť sa a slobodne sa smiať. Doprajte si pôžitok radosti, zábavy a dobrej nálady. Naše dámy však uviazli na letisku. Čakajú na svoj odlet – dovolenku snov. S viacerými tajomstvami a prekvapeniami. A popri tom čakaní postupne zabúdajú na rodinu, prácu, povinnosti... Spája ich neľahké obdobie ženy – menopauza s hormonálnym chaosom, nečakanými návalmi, telesnými a psychickými zmenami, obrovskou chuťou do jedla... Ale aj s krízou manželstva, rozpadom partnerských a rodinných väzieb, s rozhodnutím nájsť nový zmysel svojho života. Ale najmä s nezlomnou túžbou povzniesť sa. Vzlietnuť nad šedivú a ubíjajúcu realitu, zahodiť za hlavu svoje starosti. Predstavenie šťavnaté, svieže aj žensky drzé. Úprimné, pravdivo odvážne, trefne vtipné. Nenechajú sa odradiť nepriazňou osudu. Aj čakanie na letisku sa dá naplno prežiť. A užiť! Naše hrdinky sa…"
+                                }
+                    },
+                    {
+                        "sourceCode":  "bojnice_events",
+                        "sourcePageCode":  "bojnice-events",
+                        "sourceUrl":  "https://www.bojnice.sk/akcia/klimakterium-3/mid/468786/.html",
+                        "externalId":  "20cae5452216606d389928a21bf56248e87a3dacaae5aadc317d79aa6324ec18",
+                        "title":  "Klimaktérium 3",
+                        "summary":  "HORÚCE STRELY VYRÁŽAJÚ ZA HRANICE VŠEDNÝCH DNÍ 1.mimobratislavská premiéra 20. septembra 2026 o 17.00 h / Divadelná sála KC Bojnice slávny divadelný hit sa vracia na slovenské javiská – do tretice všetko najlepšie pokračovanie úspešnej komédie s pesničkami prichádza za vami Príďte sa aj vy odreagovať! Uvoľniť sa a slobodne sa smiať. Doprajte si pôžitok radosti, zábavy a dobrej nálady. Hrdinky zo seriálov „Sex v meste“ alebo „Zúfalé manželky“ to môžu zabaliť, keď na pódium vtrhnú naše štyri „kli…",
+                        "description":  "Klimaktérium 3 HORÚCE STRELY VYRÁŽAJÚ ZA HRANICE VŠEDNÝCH DNÍ 1.mimobratislavská premiéra 20. septembra 2026 o 17.00 h / Divadelná sála KC Bojnice slávny divadelný hit sa vracia na slovenské javiská – do tretice všetko najlepšie pokračovanie úspešnej komédie s pesničkami prichádza za vami Príďte sa aj vy odreagovať! Uvoľniť sa a slobodne sa smiať. Doprajte si pôžitok radosti, zábavy a dobrej nálady. Hrdinky zo seriálov „Sex v meste“ alebo „Zúfalé manželky“ to môžu zabaliť, keď na pódium vtrhnú naše štyri „klimakterické tigrice“. Dobre ich poznáte: Pamela, Žofia, Marika a Andrea. Vaše obľúbené hrdinky sú späť. Tentokrát chcú opustiť každodennú realitu a zabehnutú rutinu. V ústrety novým dobrodružstvám! Nie je to však také jednoduché... Sú neustále prenasledované mužmi. Manželom, milencom, trénerom, snúbencom, ex-partnerom, synom, priateľom, otcom, kolegom z práce... a Heňom. Ale ich túžba po zmene a odhodlanie niečo so svojím životom urobiť sú veľké. Kam sa vybrať? Chata, lyžovačka, kúpele, wellnes pobyt...? Nie! Ak zmena – tak poriadna! Ak si vyhodiť z kopýtka – tak parádne! Ich kroky smerujú na Malorku! Inscenácia, ktorá lieči pozitívnou energiou. Terapia humorom! hrajú: Zuzana TLUČKOVÁ – Gizka OŇOVÁ – Zuzana VAČKOVÁ / Lucia LAPIŠÁKOVÁ – Katarína BRYCHTOVÁ / Daniela KUFFELOVÁ / Jana VALOCKÁ texty piesní: Martin SARVAŠ, hudobná produkcia: Ľubo HORŇÁK, vokálne naštudovanie: Lenka PAULÍKOVÁ, pohybová spolupráca: Ivana ANTOLOVÁ, scéna: Tibor CSÓKA, Svetozár SPRUŠANSKÝ, kostýmy: Alexandra GRUSKOVÁ, réžia: Svetozár SPRUŠANSKÝ premiéry: 15. a 16. septembra 2026 20.9.2026 o 17:00 h",
+                        "startDate":  "2026-09-20T17:00:00+02:00",
+                        "endDate":  null,
+                        "allDay":  false,
+                        "city":  "Bojnice",
+                        "region":  "Trenčiansky kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.bojnice.sk/portals_pictures/i_008612/i_8612517.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.bojnice.sk/akcia/klimakterium-3/mid/468786/.html",
+                        "qualityScore":  90,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "Klimaktérium 3 HORÚCE STRELY VYRÁŽAJÚ ZA HRANICE VŠEDNÝCH DNÍ 1.mimobratislavská premiéra 20. septembra 2026 o 17.00 h / Divadelná sála KC Bojnice slávny divadelný hit sa vracia na slovenské javiská – do tretice všetko najlepšie pokračovanie úspešnej komédie s pesničkami prichádza za vami Príďte sa aj vy odreagovať! Uvoľniť sa a slobodne sa smiať. Doprajte si pôžitok radosti, zábavy a dobrej nálady. Hrdinky zo seriálov „Sex v meste“ alebo „Zúfalé manželky“ to môžu zabaliť, keď na pódium vtrhnú naše štyri „klimakterické tigrice“. Dobre ich poznáte: Pamela, Žofia, Marika a Andrea. Vaše obľúbené hrdinky sú späť. Tentokrát chcú opustiť každodennú realitu a zabehnutú rutinu. V ústrety novým dobrodružstvám! Nie je to však také jednoduché... Sú neustále prenasledované mužmi. Manželom, milencom, trénerom, snúbencom, ex-partnerom, synom, priateľom, otcom, kolegom z práce... a Heňom. Ale ich túžba po zmene a odhodlanie niečo so svojím životom urobiť sú veľké. Kam sa vybrať? Chata, lyžovačka, kúpele, wellnes pobyt...? Nie! Ak zmena – tak poriadna! Ak si vyhodiť z kopýtka – tak parádne! Ich kroky smerujú na Malorku! Inscenácia, ktorá lieči pozitívnou energiou. Terapia humorom! hrajú: Zuzana TLUČKOVÁ – Gizka OŇOVÁ – Zuzana VAČKOVÁ / Lucia LAPIŠÁKOVÁ – Katarína BRYCHTOVÁ / Daniela KUFFELOVÁ / Jana VALOCKÁ texty piesní: Martin SARVAŠ, hudobná produkcia: Ľubo HORŇÁK, vokálne naštudovanie: Lenka PAULÍKOVÁ, pohybová spolupráca: Ivana ANTOLOVÁ, scéna: Tibor CSÓKA, Svetozár SPRUŠANSKÝ, kostýmy: Alexandra GRUSKOVÁ, réžia: Svetozár SPRUŠANSKÝ premiéry: 15. a 16. septembra 2026 20.9.2026 o 17:00 h"
+                                }
+                    },
+                    {
+                        "sourceCode":  "bojnice_events",
+                        "sourcePageCode":  "bojnice-events",
+                        "sourceUrl":  "https://www.bojnice.sk/akcia/ach-tie-nase-zeny/mid/468786/.html",
+                        "externalId":  "dbd90f44bd958715505f3a677c4661e2b351d31bc16d2b741176a557c2bfbe0c",
+                        "title":  "Ach tie naše ženy",
+                        "summary":  "Držte si klobúky, v originálnej komediálnej hre sa pôjde až na dreň. Ach tie vzťahy... milenecké, rodinné, kamarátske, ale aj smerom k sebe. Bezohľadne nastavujú zrkadlo, a to 24/7. Niektoré z nás vytiahnu len to najlepšie, iné v nás odkrývajú temnejšiu stránku. Ženy – nedobre s nimi, horšie bez nich, povedal by klasik. Muži o nich hovoria veľa, v skutočnosti im rozumejú málo. Ako v prípade trojice kamarátov, ktorí si spoločne prešli tromi dekádami vzletov aj …",
+                        "description":  "Ach tie naše ženy Držte si klobúky, v originálnej komediálnej hre sa pôjde až na dreň. Ach tie vzťahy... milenecké, rodinné, kamarátske, ale aj smerom k sebe. Bezohľadne nastavujú zrkadlo, a to 24/7. Niektoré z nás vytiahnu len to najlepšie, iné v nás odkrývajú temnejšiu stránku. Ženy – nedobre s nimi, horšie bez nich, povedal by klasik. Muži o nich hovoria veľa, v skutočnosti im rozumejú málo. Ako v prípade trojice kamarátov, ktorí si spoločne prešli tromi dekádami vzletov aj pádov. Platí povestné „mlčať je zlato“ aj v priateľstve? Staňte sa svedkami divadelného príbehu, kedy sa obyčajná partička kariet ľahko zvrtne v boj o pravdu a spravodlivosť. Testovať sa budú tiež hranice kamarátstva, ako aj vlastnej zraniteľnosti. Puntičkár Max, samotár Pavol a rozkošný egoista Šimon v divadelnej komédii vytiahnu kostlivcov zo skríň a odkryjú kadečo. Originálna a človečinou nasiaknutá komédia Erica Assousa položí nejednu pálčivú otázku. Do akej mieri poznáme ľudí okolo seba? Veru, keď v živote trochu prituhne, neraz lepšie spoznáme aj samých seba. Presvedčte sa v komediálnej hre o tom, či priateľstvo nie je iba ušľachtilý pojem. Dovoľte si uletieť do stratosféry dlhoročného kamarátstva, kde sa životné udalosti prepletajú jedna cez druhú až vnikne klbko smiešnych náhod, nečakaných trapasov či šokujúcich zvratov. Zvíťazí pravda, pud sebazáchovy, alebo...? A možno sa v niektorej z hlavných postáv aj sami po troškách nájdete. Nechajte si vplyvom tria brilantných hercov Karla Rodena, Juraja Kemku a Mariána Rodena v alternácii s Ernestom Čekanom podrobiť vlastný cit pre správno. Na režisérsku stoličku si zasadol Jakub Nvota. Komédiu podľa francúzskej predlohy uvádza divadlo Povalač. Úspešná divadelná hra bola v roku 2015 adaptovaná aj pre filmové plátno. 8.10.2026 o 19:00 h",
+                        "startDate":  "2026-10-08T08:10:00+02:00",
+                        "endDate":  null,
+                        "allDay":  false,
+                        "city":  "Bojnice",
+                        "region":  "Trenčiansky kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  null,
+                        "imageUrl":  "https://www.bojnice.sk/portals_pictures/i_008630/i_8630334.png",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.bojnice.sk/akcia/ach-tie-nase-zeny/mid/468786/.html",
+                        "qualityScore":  90,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "listing-card",
+                        "raw":  {
+                                    "parser":  "webygroup-listing-card",
+                                    "textSample":  "Ach tie naše ženy Držte si klobúky, v originálnej komediálnej hre sa pôjde až na dreň. Ach tie vzťahy... milenecké, rodinné, kamarátske, ale aj smerom k sebe. Bezohľadne nastavujú zrkadlo, a to 24/7. Niektoré z nás vytiahnu len to najlepšie, iné v nás odkrývajú temnejšiu stránku. Ženy – nedobre s nimi, horšie bez nich, povedal by klasik. Muži o nich hovoria veľa, v skutočnosti im rozumejú málo. Ako v prípade trojice kamarátov, ktorí si spoločne prešli tromi dekádami vzletov aj pádov. Platí povestné „mlčať je zlato“ aj v priateľstve? Staňte sa svedkami divadelného príbehu, kedy sa obyčajná partička kariet ľahko zvrtne v boj o pravdu a spravodlivosť. Testovať sa budú tiež hranice kamarátstva, ako aj vlastnej zraniteľnosti. Puntičkár Max, samotár Pavol a rozkošný egoista Šimon v divadelnej komédii vytiahnu kostlivcov zo skríň a odkryjú kadečo. Originálna a človečinou nasiaknutá komédia Erica Assousa položí nejednu pálčivú otázku. Do akej mieri poznáme ľudí okolo seba? Veru, keď v živote trochu prituhne, neraz lepšie spoznáme aj samých seba. Presvedčte sa v komediálnej hre o tom, či priateľstvo nie je iba ušľachtilý pojem. Dovoľte si uletieť do stratosféry dlhoročného kamarátstva, kde sa životné udalosti prepletajú jedna cez druhú až vnikne klbko smiešnych náhod, nečakaných trapasov či šokujúcich zvratov. Zvíťazí pravda, pud sebazáchovy, alebo...? A možno sa v niektorej z hlavných postáv aj sami po troškách nájdete. Nechajte si vplyvom tria brilantných hercov Karla Rodena, Juraja Kemku a Mariána Rodena v alternácii s Ernestom Čekanom podrobiť vlastný cit pre správno. Na režisérsku stoličku si zasadol Jakub Nvota. Komédiu podľa francúzskej pred…"
+                                }
+                    },
+                    {
+                        "sourceCode":  "banska_stiavnica_kultura",
+                        "sourcePageCode":  "bs-kultura",
+                        "sourceUrl":  "https://www.kultura.banskastiavnica.sk/event/834423/stiavnicky-zivy-sach-2026",
+                        "externalId":  "9d7ec7861b9d70e6392a8d881290159b75727e816a1b070e62a5572eb3628e87",
+                        "title":  "Štiavnický živý šach 2026",
+                        "summary":  "Kompletný program, vstupenky online, kontakt a všetky informácie o Kultúrne centrum Banská Štiavnica",
+                        "description":  "kultura@banskastiavnica.sk 045/6949651 kultura@banskastiavnica.sk 045/6949651 prepnut_navigaciu ÚVOD O NÁS Organizačné zaradenie Referencie Pre umelcov Kontakty Mapa stránok Všeobecné obchodné podmienky PODUJATIA Program Zimomravenie Štiavnický živý šach Nezabudnuté remeslá Salamandrové dni Kultúrne leto s Bod K. Galéria Stojiská Online Výstavy SLUŽBY Prenájmy Výlepy plagátov Mestský rozhlas Výstavné priestory Štiavnické noviny Kino Akademik REMESELNÉ TRHY Poplatky Registrácia MIESTA Kultúrne centrum Kino Akademik Knižnica Klub Rubigall Bod K. Výmenník VSTUPENKA V MOBILE BudíCheck mailTicket Štiavnický živý šach 2026 Galéria +1 Jarmok, vystúpenia skupín historického šermu a hudby, historický sprievod a najmä nočná partia živého šachu plné vzrušenia a nezabudnuteľnej energie v podaní špičkových šachových majstrov.PROGRAM:10:00 JarmokZačiatok jarmoku pre nedočkavých.===========12:00 Historický sprievod v centre mestaViac ako stovka historických kostýmov a postáv, ktoré sa predstavia počas dňa. Živé obrazy minulosti a na záver sprievodu otvorenie podujatia salvou z historických zbraní.===========12:30 Bojník: Módna prehliadkaAko kráčal čas jednotlivými obdobiami na kráľovským dvoroch. Matej Korvín, Žigmund Luxemburský, Mária Terézia a Sissi.===========13:00 Historická krčmaCelodenná zábava v krčme spolku Vir Fortis. Ochutnávka jedál, kaukliari, šermiari, oživená história. Všetko na jednom mieste!===========13:30 Gjoll Hudobný závan zo Škandinávie. Tradičné nástroje a melódie Vikingov oživia atmosféru námestia.===========14:00 Strelecký spolokZoznámte so Štiavnickým streleckým spolkom – historickou zaujímavosťou, ktorá patrila k baníckym mestám na strednom Slovensku.===========15:00 Bojník: prierez šermuHistória šermu od stredoveku až po súčasnosť, z Európy až do Ázie. ===========16:00 Simultánna šachová partiaDvaja veľmajstri – S. Movsesian a B. Gledura – a 20 súperov. Aj by si môžete z podujatia odniesť zážitok z partie proti nim! Lístky v predaji na www.mestokultury.sk.===========18:00 Gjoll Hudobný závan zo Škandinávie. Tradičné nástroje a melódie Vikingov oživia atmosféru námestia.===========19:00 Sarus: Stredoveký šermUkážky stredovekého šermu v podaní skupiny historického šermu z Prešova.===========20:00 Vir Fortis: historické tanceNaučte sa základy historického tanca s pomocou skúsených tanečných majstrov a majsteriek zo spolu rytierov Vir Fortis!===========21:00 Štiavnický živý šachVyvrcholenie programu. Sergej Movsesian a Benjamin Gledura sa stretnú v súboji so zaviazanými očami a živými figúrkami. Živá akcia, neopakovateľná partia a zážitok pre celú rodinu. Toto si nemôžete nechať ujsť!===========Po skončení:Sokoliari sv. BavonaNočná sokoliarska šou v podaní sokoliarov z blízkej ZŠ s MŠ M. Hella v Štiavnických Baniach. Jedinečný zážitok!===========Ohňová šouZáverečná ohňová šou v podaní SHŠ SarusPočas dňa:Kyselí Krastafci - chodúľová šou // Historická krčma // Sadni a hraj // Oživené postavy z histórie // JarmokDĺžka podujatia: 720 minút Nenašli sa žiadne naplánované predstavenia pre toto podujatie. Tweet VŠEOBECNÉ OBCHODNÉ PODMIENKY I.Úvodné ustanovenia Tieto Všeobecné obchodné podmienky (ďalej len „VOP“) sa vzťahujú na predaj a postup predaja vstupeniek na kultúrne podujatia realizované Mestom Banská Štiavnica. II.Vstupenky 1. Vstupenka je cenina a potvrdenie umožňujúce jej majiteľovi za poplatok (spravidla jednorazový) vstup na Podujatie, na ktoré bola zakúpená. Vstupenka je zakúpená, a zároveň vytlačená v pokladniach prevádzky prevádzkovaných Prevádzkovateľom, a to kina Akademik alebo Kultúrneho centra (ďalej len „Prevádzok“).2. mailTicket“ je vstupenka zakúpená prostredníctvom internetovej stránky www.banskastiavnica.sk/kino aleboo www.banskastiavnica.sk/kultura a jej podstránok pre jednotlivé Prevádzky, a to: s unikátnym čiarovým kódom, vytlačená Zákazníkom, alebo vstupenka vo formáte PDF s unikátnym čiarovým kódom predložená Zákazníkom uvádzačovi pred vstupom do Prevádzky prostredníctvom prenosného elektronickéh…",
+                        "startDate":  "2027-02-23T10:00:00+01:00",
+                        "endDate":  null,
+                        "allDay":  false,
+                        "city":  "Banská Štiavnica",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  "Nám. sv",
+                        "imageUrl":  "https://storage.cinemaware.eu/katalogy/images/2/c/2c3511dd-64a3-11f1-9bbd-9e966f951e90.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  null,
+                        "priceMax":  null,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.kultura.banskastiavnica.sk/event/834423/stiavnicky-zivy-sach-2026",
+                        "qualityScore":  90,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "html-detail",
+                        "raw":  {
+                                    "parser":  "html-detail",
+                                    "textSample":  "kultura@banskastiavnica.sk 045/6949651 kultura@banskastiavnica.sk 045/6949651 prepnut_navigaciu ÚVOD O NÁS Organizačné zaradenie Referencie Pre umelcov Kontakty Mapa stránok Všeobecné obchodné podmienky PODUJATIA Program Zimomravenie Štiavnický živý šach Nezabudnuté remeslá Salamandrové dni Kultúrne leto s Bod K. Galéria Stojiská Online Výstavy SLUŽBY Prenájmy Výlepy plagátov Mestský rozhlas Výstavné priestory Štiavnické noviny Kino Akademik REMESELNÉ TRHY Poplatky Registrácia MIESTA Kultúrne centrum Kino Akademik Knižnica Klub Rubigall Bod K. Výmenník VSTUPENKA V MOBILE BudíCheck mailTicket Štiavnický živý šach 2026 Galéria +1 Jarmok, vystúpenia skupín historického šermu a hudby, historický sprievod a najmä nočná partia živého šachu plné vzrušenia a nezabudnuteľnej energie v podaní špičkových šachových majstrov.PROGRAM:10:00 JarmokZačiatok jarmoku pre nedočkavých.===========12:00 Historický sprievod v centre mestaViac ako stovka historických kostýmov a postáv, ktoré sa predstavia počas dňa. Živé obrazy minulosti a na záver sprievodu otvorenie podujatia salvou z historických zbraní.===========12:30 Bojník: Módna prehliadkaAko kráčal čas jednotlivými obdobiami na kráľovským dvoroch. Matej Korvín, Žigmund Luxemburský, Mária Terézia a Sissi.===========13:00 Historická krčmaCelodenná zábava v krčme spolku Vir Fortis. Ochutnávka jedál, kaukliari, šermiari, oživená história. Všetko na jednom mieste!===========13:30 Gjoll Hudobný závan zo Škandinávie. Tradičné nástroje a melódie Vikingov oživia atmosféru námestia.===========14:00 Strelecký spolokZoznámte so Štiavnickým streleckým spolkom – historickou zaujímavosťou, ktorá patrila k baníckym mestám na strednom Slovensku.===========15:00 Bojník: prierez šermuHistória šermu od stredoveku až po súčasnosť, z Európy až do Ázie. ===…"
+                                }
+                    },
+                    {
+                        "sourceCode":  "banska_stiavnica_kultura",
+                        "sourcePageCode":  "bs-kultura",
+                        "sourceUrl":  "https://www.kultura.banskastiavnica.sk/event/834427/stiavnicky-zivy-sach-2026-simultanna-partia-s-gm-movsesianom-a-gm-gledurom",
+                        "externalId":  "d8db939b61918b2fb1a9e116954994feb860b87d4eee8f2f9caf8049595acf99",
+                        "title":  "Štiavnický živý šach 2026: Simultánna partia s GM Movsesianom a GM Gledurom",
+                        "summary":  "Kompletný program, vstupenky online, kontakt a všetky informácie o Kultúrne centrum Banská Štiavnica",
+                        "description":  "kultura@banskastiavnica.sk 045/6949651 kultura@banskastiavnica.sk 045/6949651 prepnut_navigaciu ÚVOD O NÁS Organizačné zaradenie Referencie Pre umelcov Kontakty Mapa stránok Všeobecné obchodné podmienky PODUJATIA Program Zimomravenie Štiavnický živý šach Nezabudnuté remeslá Salamandrové dni Kultúrne leto s Bod K. Galéria Stojiská Online Výstavy SLUŽBY Prenájmy Výlepy plagátov Mestský rozhlas Výstavné priestory Štiavnické noviny Kino Akademik REMESELNÉ TRHY Poplatky Registrácia MIESTA Kultúrne centrum Kino Akademik Knižnica Klub Rubigall Bod K. Výmenník VSTUPENKA V MOBILE BudíCheck mailTicket Štiavnický živý šach 2026: Simultánna partia s GM Movsesianom a GM Gledurom Galéria +1 Súčasťou podujatia Štiavnický živý šach je aj tradičná simultánna partia verejnosti, v ktorej si môže ktokoľvek vyskúšať svoje sily v porovnaní so špičkovými svetovými hráčmi. Partia sa začína o 16:00 hod. na Námestí sv. Trojice (pred objektom Rubigall), je vhodné, aby účastníci so zakúpenými lístkami boli a mieste 15 minút vopred. Po oslovení moderátorom zaujmú svoje miesta a získajú nezabudnuteľný zážitok zo šachovej hry a spomienku na mimoriadny letný deň.Upozornenie: cena lístka je 15€ a kapacita je obmedzená!BENJAMÍN GLEDURA je maďarský šachový veľmajster a jeden z popredných predstaviteľov novej generácie európskych šachových talentov. Narodil sa 4. júla 1999 a už od útleho veku preukazoval výnimočné šachové schopnosti. Vďaka kombinácii strategického myslenia, taktickej kreativity a disciplinovanej prípravy sa rýchlo zaradil medzi najväčšie maďarské talenty.Titul veľmajstra získal v roku 2015, čím sa stal jedným z najmladších maďarských hráčov, ktorým sa podarilo dosiahnuť toto prestížne ocenenie. Odvtedy si vybudoval pôsobivú medzinárodnú kariéru, úspešne súťažil na elitných turnajoch a reprezentoval Maďarsko na najvyššej úrovni tímových súťaží.Gledura je trojnásobným majstrom Maďarska v rapid šachu a dlhodobo potvrdzuje svoju všestrannosť a bojovného ducha vo viacerých formátoch hry. Maďarsko reprezentoval aj na mnohých šachových olympiádach a majstrovstvách Európy družstiev, kde si svojimi výkonmi proti špičkovej medzinárodnej konkurencii získal široké uznanie. Jeden z jeho najvýznamnejších úspechov prišiel na Šachovej olympiáde, kde získal individuálnu striebornú medailu na svojej šachovnici, čím potvrdil svoju stabilnú výkonnosť a silu v jednej z najprestížnejších tímových súťaží na svete.Je známy svojím dynamickým a ambicióznym herným štýlom. Počas kariéry dosiahol víťazstvá nad viacerými svetovými veľmajstrami vrátane bývalého majstra sveta Viswanathan Anand. Jeho partie sú obdivované pre kreativitu, presné prepočty variantov a hlbokú teoretickú prípravu v otvoreniach, vďaka čomu je mimoriadne nebezpečným súperom v klasickom aj rapid šachu.Okrem svojich súťažných úspechov je Gledura považovaný za významného ambasádora maďarského šachu. Svojou profesionalitou, športovým správaním a odhodlaním neustále sa zlepšovať inšpiruje mladšie generácie hráčov a zároveň prispieva k bohatej šachovej tradícii Maďarska.Benjamin Gledura aj naďalej úspešne súťaží na medzinárodnej scéne a patrí medzi najúspešnejších maďarských veľmajstrov a výrazné osobnosti súčasného európskeho šachu.---------SERGEJ MOVSESIAN je šachový veľmajster arménskeho pôvodu, ktorý dlhé roky reprezentoval Slovensko a patril medzi najúspešnejších slovenských šachistov svojej generácie.. Narodil sa 3. novembra 1978 v Tbilisi vtedajšieho Sovietskeho zväzu. Počas svojej bohatej kariéry reprezentoval viacero krajín vrátane Českej republiky, Slovenska a Arménska, pričom sa vypracoval medzi svetovú šachovú elitu a v roku 2009 sa dostal až na 10. miesto svetového rebríčka FIDE. Titul veľmajstra získal v roku 1997 a už v mladom veku sa etabloval ako mimoriadne silný turnajový hráč. V priebehu kariéry dosiahol množstvo významných úspechov na medzinárodnej scéne, pričom vynikal najmä univerzálnym štýlom hry, technickou presnosťou a schopnosťou úspešne zvládať zložité strategické pozície. Movsesi…",
+                        "startDate":  "2027-02-23T16:00:00+01:00",
+                        "endDate":  null,
+                        "allDay":  false,
+                        "city":  "Banská Štiavnica",
+                        "region":  "Banskobystrický kraj",
+                        "countryCode":  "SK",
+                        "venueName":  null,
+                        "address":  "Nám. sv",
+                        "imageUrl":  "https://storage.cinemaware.eu/katalogy/images/d/4/d410e8a8-64a5-11f1-9bbd-9e966f951e90.jpg",
+                        "freeEntry":  false,
+                        "priceMin":  15,
+                        "priceMax":  15,
+                        "currency":  "EUR",
+                        "purchaseUrl":  "https://www.kultura.banskastiavnica.sk/event/834427/stiavnicky-zivy-sach-2026-simultanna-partia-s-gm-movsesianom-a-gm-gledurom",
+                        "qualityScore":  100,
+                        "warnings":  [
+
+                                     ],
+                        "canceled":  false,
+                        "parser":  "html-detail",
+                        "raw":  {
+                                    "parser":  "html-detail",
+                                    "textSample":  "kultura@banskastiavnica.sk 045/6949651 kultura@banskastiavnica.sk 045/6949651 prepnut_navigaciu ÚVOD O NÁS Organizačné zaradenie Referencie Pre umelcov Kontakty Mapa stránok Všeobecné obchodné podmienky PODUJATIA Program Zimomravenie Štiavnický živý šach Nezabudnuté remeslá Salamandrové dni Kultúrne leto s Bod K. Galéria Stojiská Online Výstavy SLUŽBY Prenájmy Výlepy plagátov Mestský rozhlas Výstavné priestory Štiavnické noviny Kino Akademik REMESELNÉ TRHY Poplatky Registrácia MIESTA Kultúrne centrum Kino Akademik Knižnica Klub Rubigall Bod K. Výmenník VSTUPENKA V MOBILE BudíCheck mailTicket Štiavnický živý šach 2026: Simultánna partia s GM Movsesianom a GM Gledurom Galéria +1 Súčasťou podujatia Štiavnický živý šach je aj tradičná simultánna partia verejnosti, v ktorej si môže ktokoľvek vyskúšať svoje sily v porovnaní so špičkovými svetovými hráčmi. Partia sa začína o 16:00 hod. na Námestí sv. Trojice (pred objektom Rubigall), je vhodné, aby účastníci so zakúpenými lístkami boli a mieste 15 minút vopred. Po oslovení moderátorom zaujmú svoje miesta a získajú nezabudnuteľný zážitok zo šachovej hry a spomienku na mimoriadny letný deň.Upozornenie: cena lístka je 15€ a kapacita je obmedzená!BENJAMÍN GLEDURA je maďarský šachový veľmajster a jeden z popredných predstaviteľov novej generácie európskych šachových talentov. Narodil sa 4. júla 1999 a už od útleho veku preukazoval výnimočné šachové schopnosti. Vďaka kombinácii strategického myslenia, taktickej kreativity a disciplinovanej prípravy sa rýchlo zaradil medzi najväčšie maďarské talenty.Titul veľmajstra získal v roku 2015, čím sa stal jedným z najmladších maďarských hráčov, ktorým sa podarilo dosiahnuť toto prestížne ocenenie. Odvtedy si vybudoval pôsobivú medzinárodnú kariéru, úspešne súťažil na elitných turnajoch a re…"
+                                }
+                    }
+                ],
+    "rejectedPreview":  [
+
+                        ],
+    "note":  "Preview nič nezapísal. Zobrazuje iba budúce/neukončené udalosti, ktoré prešli kontrolou kvality."
+}
