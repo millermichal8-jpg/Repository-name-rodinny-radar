@@ -49,3 +49,9 @@ supabase/.temp/
 supabase/functions/.env
 .rr-backups/
 *.log
+
+# Local Supabase development files
+supabase/test-results/
+supabase/*.log
+supabase/functions/.env
+.rr-backups/
