@@ -55,3 +55,6 @@ supabase/test-results/
 supabase/*.log
 supabase/functions/.env
 .rr-backups/
+supabase/functions/.env.data-expansion.local
+supabase/data-expansion-v1-*.log
+supabase/test-results/

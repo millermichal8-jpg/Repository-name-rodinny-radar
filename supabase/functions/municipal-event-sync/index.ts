@@ -5,8 +5,19 @@ type JsonObject = Record<string, unknown>;
 
 type SourceConfig = {
   allowedPathRegex?: string;
+  allowedUrlRegex?: string;
+  excludeUrlRegex?: string;
   minimumQuality?: number;
   maximumFutureDays?: number;
+  cardSelector?: string;
+  linkSelector?: string;
+  titleSelector?: string;
+  dateSelector?: string;
+  venueSelector?: string;
+  descriptionSelector?: string;
+  imageSelector?: string;
+  allowExternalHost?: boolean;
+  defaultCurrency?: "EUR" | "CZK";
 };
 
 type SourcePage = {
@@ -20,6 +31,9 @@ type SourcePage = {
   default_region: string | null;
   max_event_links: number;
   config: SourceConfig;
+  group_code?: string | null;
+  priority?: number | null;
+  cron_enabled?: boolean | null;
 };
 
 type EventCandidate = {
@@ -47,7 +61,7 @@ type EventCandidate = {
   qualityScore: number;
   warnings: string[];
   canceled: boolean;
-  parser: "jsonld" | "citio-detail" | "webygroup-detail" | "ticketware-card";
+  parser: "jsonld" | "citio-detail" | "webygroup-detail" | "ticketware-card" | "generic-detail" | "generic-card";
   raw: JsonObject;
 };
 
@@ -69,7 +83,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-sync-token",
 };
 const USER_AGENT =
-  "RodinnyRadarBot/3.0 (+official municipal event indexing; contact: project owner)";
+  "RodinnyRadarBot/4.0 (+official municipal event indexing; contact: project owner)";
 
 const BLOCKED_TITLES = new Set([
   "podujatia",
@@ -98,6 +112,15 @@ const BLOCKED_TITLES = new Set([
   "dolezite odkazy",
   "napiste nam",
   "prihlasovanie na univerzitu tretieho veku je spustene",
+  "vsetky akcie",
+  "vsetky podujatia",
+  "dalsie akcie",
+  "dalsie podujatia",
+  "zobrazit detail",
+  "viac info",
+  "detail akce",
+  "kalendar akci",
+  "kalendar podujati",
 ]);
 
 const MONTHS: Record<string, number> = {
@@ -183,6 +206,8 @@ function isBlockedTitle(title: string) {
   const normalized = normalizeText(title);
   if (normalized.length < 4 || normalized.length > 180) return true;
   if (BLOCKED_TITLES.has(normalized)) return true;
+  if (/\bodkaz na titulni stranku\b/i.test(normalized)) return true;
+  if (/\boficialni web mestske casti\b/i.test(normalized)) return true;
   return /^(strana\s+\d+|cookies?|nastavenia cookies|za obsah zodpoveda|technicky prevadzkovatel|zobrazit vsetky podujatia)$/i
     .test(normalized);
 }
@@ -314,15 +339,47 @@ function isoFromParts(
   return `${year}-${pad(month)}-${pad(day)}T${pad(safeHour)}:${pad(safeMinute)}:00${bratislavaOffset(year, month, day)}`;
 }
 
+function extractTimes(text: string) {
+  const matches: Array<{ hour: number; minute: number; index: number }> = [];
+
+  for (const match of text.matchAll(/\b([01]?\d|2[0-3]):(\d{2})\b/g)) {
+    matches.push({
+      hour: Number(match[1]),
+      minute: Number(match[2]),
+      index: match.index ?? 0,
+    });
+  }
+
+  for (const match of text.matchAll(/\b([01]?\d|2[0-3])\.(\d{2})(?!\.)\b/g)) {
+    const index = match.index ?? 0;
+    const before = text.slice(Math.max(0, index - 3), index);
+    const after = text.slice(index + match[0].length, index + match[0].length + 6);
+
+    // Bodka sa v SK/CZ často používa aj v dátume (napr. 18.07.2026).
+    // Takýto zápis nesmie byť omylom považovaný za čas 18:07.
+    if (/\.\s*$/.test(before) || /^\s*\.\s*\d/.test(after)) continue;
+
+    matches.push({
+      hour: Number(match[1]),
+      minute: Number(match[2]),
+      index,
+    });
+  }
+
+  return matches
+    .filter((item) => item.minute >= 0 && item.minute <= 59)
+    .sort((a, b) => a.index - b.index);
+}
+
 function parseTime(text: string) {
-  const match = text.match(/\b(?:o\s+|od\s+)?([01]?\d|2[0-3])[:.](\d{2})\b/i);
-  return match ? { hour: Number(match[1]), minute: Number(match[2]) } : null;
+  const [first] = extractTimes(text);
+  return first ? { hour: first.hour, minute: first.minute } : null;
 }
 
 function parseSecondTime(text: string) {
-  const matches = [...text.matchAll(/\b([01]?\d|2[0-3])[:.](\d{2})\b/g)];
+  const matches = extractTimes(text);
   if (matches.length < 2) return null;
-  return { hour: Number(matches[1][1]), minute: Number(matches[1][2]) };
+  return { hour: matches[1].hour, minute: matches[1].minute };
 }
 
 function parseHumanDateRange(text: string, yearIfMissing = new Date().getFullYear()): ParsedDateRange {
@@ -459,21 +516,26 @@ function parseWebygroupDateFields(dateText: string, endText: string | null, time
   return { startDate, endDate, allDay: !time };
 }
 
-function parsePrice(text: string) {
+function parsePrice(text: string, defaultCurrency: "EUR" | "CZK" = "EUR") {
   const normalized = normalizeText(text);
-  const values = [...text.matchAll(/(\d{1,4}(?:[,.]\d{1,2})?)\s*(?:€|EUR)\b/gi)]
+  const eurValues = [...text.matchAll(/(\d{1,5}(?:[,.]\d{1,2})?)\s*(?:€|EUR)\b/gi)]
     .map((match) => Number(match[1].replace(",", ".")))
-    .filter((value) => Number.isFinite(value) && value >= 0 && value < 10_000);
-  const freeEntry = /\b(vstup volny|vstup zdarma|zadarmo|bezplatne|bezplatny)\b/i.test(normalized) ||
+    .filter((value) => Number.isFinite(value) && value >= 0 && value < 100_000);
+  const czkValues = [...text.matchAll(/(\d{1,6}(?:[,.]\d{1,2})?)\s*(?:Kč|CZK)\b/gi)]
+    .map((match) => Number(match[1].replace(",", ".")))
+    .filter((value) => Number.isFinite(value) && value >= 0 && value < 1_000_000);
+  const currency = czkValues.length > eurValues.length ? "CZK" : eurValues.length ? "EUR" : defaultCurrency;
+  const values = currency === "CZK" ? czkValues : eurValues;
+  const freeEntry = /\b(vstup volny|vstup zdarma|zadarmo|bezplatne|bezplatny|vstup zdarma|zdarma|vstup volny|bezplatne)\b/i.test(normalized) ||
     (values.length > 0 && values.every((value) => value === 0));
   if (freeEntry) {
-    return { freeEntry: true, priceMin: 0, priceMax: 0, currency: "EUR" };
+    return { freeEntry: true, priceMin: 0, priceMax: 0, currency };
   }
   return {
     freeEntry: false,
     priceMin: values.length ? Math.min(...values) : null,
     priceMax: values.length ? Math.max(...values) : null,
-    currency: "EUR",
+    currency,
   };
 }
 
@@ -571,7 +633,8 @@ async function candidateFromJsonLd(
     ? [objectValue(event.offers)!]
     : [];
   const offerText = offers.map((offer) => `${offer.price ?? ""} ${offer.priceCurrency ?? ""}`).join(" ");
-  const price = parsePrice(offerText);
+  const defaultCurrency = source.config?.defaultCurrency ?? (source.country_code === "CZ" ? "CZK" : "EUR");
+  const price = parsePrice(offerText, defaultCurrency);
   const numericPrices = offers
     .map((offer) => Number(offer.price))
     .filter((value) => Number.isFinite(value) && value >= 0);
@@ -611,7 +674,7 @@ async function candidateFromJsonLd(
     freeEntry: price.freeEntry,
     priceMin: price.priceMin,
     priceMax: price.priceMax,
-    currency: offers.map((offer) => getString(offer.priceCurrency)).find(Boolean) ?? "EUR",
+    currency: offers.map((offer) => getString(offer.priceCurrency)).find(Boolean) ?? defaultCurrency,
     purchaseUrl: offers.map((offer) => firstUrl(offer.url)).find(Boolean) ?? firstUrl(event.url),
     qualityScore: Math.min(100, qualityScore),
     warnings: canceled ? ["Podujatie je zrušené"] : [],
@@ -660,6 +723,285 @@ function findImage($: cheerio.CheerioAPI, sourceUrl: string) {
       .map((element: any) => $(element).attr("src"))
       .find((src: string | undefined) => src && !/logo|icon|avatar|banner/i.test(src)));
   return raw ? absoluteUrl(raw, sourceUrl) : null;
+}
+
+
+type GenericCardSeed = {
+  sourceUrl: string;
+  title: string;
+  text: string;
+  date: ParsedDateRange;
+  venueName: string | null;
+  imageUrl: string | null;
+};
+
+function regexMatches(value: string, pattern: string | undefined) {
+  if (!pattern) return true;
+  const regex = safeRegex(pattern);
+  return regex ? regex.test(value) : false;
+}
+
+function allowedGenericUrl(source: SourcePage, url: string, baseUrl: string) {
+  if (!source.config?.allowExternalHost && !sameHost(url, baseUrl)) return false;
+  const target = `${new URL(url).pathname}${new URL(url).search}`;
+  if (source.config?.allowedUrlRegex && !regexMatches(url, source.config.allowedUrlRegex)) return false;
+  if (source.config?.allowedPathRegex && !regexMatches(target, source.config.allowedPathRegex)) return false;
+  if (source.config?.excludeUrlRegex && regexMatches(url, source.config.excludeUrlRegex)) return false;
+  return true;
+}
+
+function parseDateTimeAttribute(value: string | undefined | null): ParsedDateRange | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return {
+    startDate: date.toISOString(),
+    endDate: null,
+    allDay: !value.includes("T") && !value.includes(":"),
+  };
+}
+
+function extractVenueFromText(text: string) {
+  const match = text.match(/(?:Miesto|Místo|Kde|Venue)\s*:?\s*([^|•\n]{2,140})/iu);
+  return match ? collapseWhitespace(match[1]) : null;
+}
+
+function selectorText(
+  $: cheerio.CheerioAPI,
+  scope: cheerio.Cheerio<cheerio.AnyNode>,
+  selector: string | undefined,
+) {
+  if (!selector) return null;
+  try {
+    return getString(collapseWhitespace(scope.find(selector).first().text()));
+  } catch {
+    return null;
+  }
+}
+
+function selectorImage(
+  $: cheerio.CheerioAPI,
+  scope: cheerio.Cheerio<cheerio.AnyNode>,
+  selector: string | undefined,
+  baseUrl: string,
+) {
+  if (!selector) return null;
+  try {
+    const raw = scope.find(selector).first().attr("src") ?? scope.find(selector).first().attr("data-src");
+    return raw ? absoluteUrl(raw, baseUrl) : null;
+  } catch {
+    return null;
+  }
+}
+
+function bestGenericTitle(
+  $: cheerio.CheerioAPI,
+  source: SourcePage,
+  fallbackTitle: string,
+) {
+  const configured = source.config?.titleSelector
+    ? getString($(source.config.titleSelector).first().text())
+    : null;
+  const title = cleanAnchorTitle(
+    configured ??
+      getString($("main h1, article h1, h1").first().text()) ??
+      getString($('meta[property="og:title"]').attr("content")) ??
+      fallbackTitle,
+  );
+  return title && !isBlockedTitle(title) ? title : null;
+}
+
+async function parseGenericDetail(
+  source: SourcePage,
+  sourceUrl: string,
+  fallbackTitle: string,
+  seed?: GenericCardSeed,
+): Promise<EventCandidate | null> {
+  const { html, finalUrl } = await fetchHtml(sourceUrl);
+  const $ = cheerio.load(html);
+  const jsonEvents: JsonObject[] = [];
+  for (const root of extractJsonLd($)) walkJson(root, jsonEvents);
+  for (const event of jsonEvents) {
+    const candidate = await candidateFromJsonLd(event, source, finalUrl);
+    if (candidate) return { ...candidate, parser: "jsonld" };
+  }
+
+  const title = bestGenericTitle($, source, fallbackTitle);
+  if (!title) return null;
+  const scope = mainScope($);
+  const fullText = cleanedText($);
+  const configuredDescription = selectorText($, scope, source.config?.descriptionSelector);
+  const metaDescription = getString($('meta[name="description"]').attr("content")) ??
+    getString($('meta[property="og:description"]').attr("content"));
+  const description = collapseWhitespace(
+    configuredDescription ?? metaDescription ?? extractSectionWindow(fullText, title, [
+      "Podobné",
+      "Súvisiace",
+      "Další akce",
+      "Ďalšie podujatia",
+      "Kontakt",
+      "Technický prevádzkovateľ",
+    ]),
+  );
+
+  const configuredDateText = selectorText($, scope, source.config?.dateSelector);
+  const dateTimeAttr = scope.find("time[datetime]").first().attr("datetime");
+  const parsedAttr = parseDateTimeAttribute(dateTimeAttr);
+  const date = parsedAttr?.startDate
+    ? parsedAttr
+    : parseHumanDateRange(configuredDateText ?? `${seed?.text ?? ""} ${fullText.slice(0, 1800)}`);
+  if (!date.startDate && seed?.date.startDate) {
+    date.startDate = seed.date.startDate;
+    date.endDate = seed.date.endDate;
+    date.allDay = seed.date.allDay;
+  }
+  if (!date.startDate) return null;
+
+  const venueName = selectorText($, scope, source.config?.venueSelector) ??
+    extractVenueFromText(`${seed?.text ?? ""} ${fullText.slice(0, 2200)}`) ??
+    seed?.venueName ??
+    source.default_city;
+  const imageUrl = selectorImage($, scope, source.config?.imageSelector, finalUrl) ??
+    findImage($, finalUrl) ?? seed?.imageUrl ?? null;
+  const defaultCurrency = source.config?.defaultCurrency ?? (source.country_code === "CZ" ? "CZK" : "EUR");
+  const price = parsePrice(`${seed?.text ?? ""} ${description}`, defaultCurrency);
+  const canceled = isCanceledText(`${title} ${description}`);
+  const externalId = await sha256(`${source.source_code}|${finalUrl}|${title}|${date.startDate}`);
+  let qualityScore = 72;
+  if (source.default_city || venueName) qualityScore += 8;
+  if (imageUrl) qualityScore += 5;
+  if (description.length > 100) qualityScore += 6;
+  if (price.freeEntry || price.priceMin !== null) qualityScore += 5;
+  if (date.endDate) qualityScore += 2;
+
+  return {
+    sourceCode: source.source_code,
+    sourcePageCode: source.code,
+    sourceUrl: finalUrl,
+    externalId,
+    title,
+    summary: truncate(description, 500),
+    description: truncate(description, 4000),
+    startDate: date.startDate,
+    endDate: date.endDate,
+    allDay: date.allDay,
+    city: source.default_city,
+    region: source.default_region,
+    countryCode: source.country_code,
+    venueName,
+    address: venueName,
+    imageUrl,
+    freeEntry: price.freeEntry,
+    priceMin: price.priceMin,
+    priceMax: price.priceMax,
+    currency: price.currency,
+    purchaseUrl: finalUrl,
+    qualityScore: Math.min(100, qualityScore),
+    warnings: canceled ? ["Podujatie je zrušené"] : [],
+    canceled,
+    parser: "generic-detail",
+    raw: {
+      parser: "generic-detail-v4",
+      seedText: truncate(seed?.text ?? null, 1200),
+      configuredDateText,
+      dateTimeAttr,
+    },
+  };
+}
+
+function findGenericCard(
+  $: cheerio.CheerioAPI,
+  anchor: cheerio.Cheerio<cheerio.AnyNode>,
+  source: SourcePage,
+  finalUrl: string,
+): GenericCardSeed | null {
+  const href = anchor.attr("href");
+  if (!href) return null;
+  const sourceUrl = absoluteUrl(href, finalUrl);
+  if (!sourceUrl || !allowedGenericUrl(source, sourceUrl, finalUrl)) return null;
+
+  let node = source.config?.cardSelector ? anchor.closest(source.config.cardSelector) : anchor.parent();
+  for (let depth = 0; depth < 7 && node.length; depth += 1) {
+    const text = collapseWhitespace(node.text());
+    if (text.length >= 12 && text.length <= 2600) {
+      const configuredTitle = selectorText($, node, source.config?.titleSelector);
+      const headingTitle = getString(node.find("h1,h2,h3,h4").first().text());
+      const title = cleanAnchorTitle(configuredTitle ?? headingTitle ?? anchor.text());
+      const configuredDate = selectorText($, node, source.config?.dateSelector);
+      const timeDate = parseDateTimeAttribute(node.find("time[datetime]").first().attr("datetime"));
+      const date = timeDate?.startDate ? timeDate : parseHumanDateRange(configuredDate ?? text);
+      if (title && !isBlockedTitle(title) && date.startDate) {
+        const venueName = selectorText($, node, source.config?.venueSelector) ?? extractVenueFromText(text);
+        const imageUrl = selectorImage($, node, source.config?.imageSelector ?? "img", finalUrl);
+        return { sourceUrl, title, text, date, venueName, imageUrl };
+      }
+    }
+    if (source.config?.cardSelector) break;
+    node = node.parent();
+  }
+  return null;
+}
+
+async function parseGenericCards(
+  source: SourcePage,
+  html: string,
+  finalUrl: string,
+): Promise<EventCandidate[]> {
+  const $ = cheerio.load(html);
+  const scope = mainScope($);
+  const selector = source.config?.linkSelector ?? "a[href]";
+  const seeds = new Map<string, GenericCardSeed>();
+  for (const element of scope.find(selector).toArray()) {
+    const seed = findGenericCard($, $(element), source, finalUrl);
+    if (!seed) continue;
+    const key = `${seed.sourceUrl}|${normalizeText(seed.title)}|${seed.date.startDate}`;
+    if (!seeds.has(key)) seeds.set(key, seed);
+    if (seeds.size >= source.max_event_links) break;
+  }
+
+  const output: EventCandidate[] = [];
+  for (const seed of seeds.values()) {
+    try {
+      const candidate = await parseGenericDetail(source, seed.sourceUrl, seed.title, seed);
+      if (candidate) {
+        output.push({ ...candidate, parser: candidate.parser === "jsonld" ? "jsonld" : "generic-card" });
+      }
+    } catch {
+      const defaultCurrency = source.config?.defaultCurrency ?? (source.country_code === "CZ" ? "CZK" : "EUR");
+      const price = parsePrice(seed.text, defaultCurrency);
+      const canceled = isCanceledText(`${seed.title} ${seed.text}`);
+      const externalId = await sha256(`${source.source_code}|${seed.sourceUrl}|${seed.title}|${seed.date.startDate}`);
+      output.push({
+        sourceCode: source.source_code,
+        sourcePageCode: source.code,
+        sourceUrl: seed.sourceUrl,
+        externalId,
+        title: seed.title,
+        summary: truncate(seed.text, 500),
+        description: truncate(seed.text, 4000),
+        startDate: seed.date.startDate,
+        endDate: seed.date.endDate,
+        allDay: seed.date.allDay,
+        city: source.default_city,
+        region: source.default_region,
+        countryCode: source.country_code,
+        venueName: seed.venueName ?? source.default_city,
+        address: seed.venueName,
+        imageUrl: seed.imageUrl,
+        freeEntry: price.freeEntry,
+        priceMin: price.priceMin,
+        priceMax: price.priceMax,
+        currency: price.currency,
+        purchaseUrl: seed.sourceUrl,
+        qualityScore: 76,
+        warnings: canceled ? ["Podujatie je zrušené"] : ["Detail sa nepodarilo obohatiť; použité dáta z karty."],
+        canceled,
+        parser: "generic-card",
+        raw: { parser: "generic-card-v4", cardText: truncate(seed.text, 1800) },
+      });
+    }
+  }
+  return output;
 }
 
 async function parseCitioDetail(
@@ -916,6 +1258,41 @@ async function parseTicketwareCards(
   return output.slice(0, source.max_event_links);
 }
 
+function normalizeCandidateDateRange(candidate: EventCandidate): EventCandidate {
+  if (!candidate.startDate || !candidate.endDate) return candidate;
+
+  const start = new Date(candidate.startDate);
+  const end = new Date(candidate.endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return { ...candidate, endDate: null };
+  }
+
+  if (end.getTime() >= start.getTime()) return candidate;
+
+  // Reálny nočný program môže končiť po polnoci. V takom prípade posunieme
+  // koniec o deň. Pri ostatných neplatných rozsahoch koniec radšej zahodíme,
+  // aby databáza prijala udalosť bez vymysleného času ukončenia.
+  const startHour = start.getHours();
+  const endHour = end.getHours();
+  if (!candidate.allDay && startHour >= 18 && endHour <= 6) {
+    const correctedEnd = new Date(end);
+    correctedEnd.setDate(correctedEnd.getDate() + 1);
+    if (correctedEnd.getTime() >= start.getTime()) {
+      return {
+        ...candidate,
+        endDate: correctedEnd.toISOString(),
+        warnings: [...new Set([...candidate.warnings, "Koniec podujatia bol posunutý za polnoc"])],
+      };
+    }
+  }
+
+  return {
+    ...candidate,
+    endDate: null,
+    warnings: [...new Set([...candidate.warnings, "Neplatný koniec podujatia bol odstránený"])],
+  };
+}
+
 function validateCandidate(candidate: EventCandidate, source: SourcePage): ValidationResult {
   if (isBlockedTitle(candidate.title)) return { accepted: false, reason: "blocked_title" };
   if (candidate.canceled) return { accepted: false, reason: "canceled" };
@@ -1004,12 +1381,45 @@ function dedupeCandidates(candidates: EventCandidate[]) {
 async function loadSources(
   supabase: ReturnType<typeof createClient>,
   sourceCodes: string[] | null,
+  sourceGroup: string | null,
+  includeDisabled: boolean,
 ) {
-  const { data, error } = await supabase.rpc("catalog_list_source_pages_v1", {
+  const v2 = await supabase.rpc("catalog_list_source_pages_v2", {
+    p_codes: sourceCodes,
+    p_group_code: sourceGroup,
+    p_include_disabled: includeDisabled,
+  });
+  if (!v2.error) return (v2.data ?? []) as SourcePage[];
+
+  const v1 = await supabase.rpc("catalog_list_source_pages_v1", {
     p_codes: sourceCodes,
   });
-  if (error) throw new Error(`Načítanie zdrojov: ${error.message}`);
-  return (data ?? []) as SourcePage[];
+  if (v1.error) throw new Error(`Načítanie zdrojov: ${v1.error.message}`);
+  return (v1.data ?? []) as SourcePage[];
+}
+
+async function recordSourceRun(
+  supabase: ReturnType<typeof createClient>,
+  source: SourcePage,
+  action: string,
+  startedAt: string,
+  durationMs: number,
+  stats: JsonObject,
+  errorMessage: string | null,
+) {
+  try {
+    await supabase.rpc("catalog_record_source_run_v1", {
+      p_source_page_code: source.code,
+      p_action: action,
+      p_started_at: startedAt,
+      p_duration_ms: durationMs,
+      p_success: !errorMessage,
+      p_stats: stats,
+      p_error_message: errorMessage,
+    });
+  } catch {
+    // Health reporting migration may not be installed in older local databases.
+  }
 }
 
 async function parseSource(source: SourcePage) {
@@ -1020,26 +1430,50 @@ async function parseSource(source: SourcePage) {
       candidates: await parseTicketwareCards(source, listing.html, listing.finalUrl),
     };
   }
+  if (source.adapter === "generic_cards_v4") {
+    const candidates = await parseGenericCards(source, listing.html, listing.finalUrl);
+    return { discoveredLinks: candidates.length, candidates };
+  }
 
   const configured = safeRegex(source.config?.allowedPathRegex);
+  const configuredUrl = safeRegex(source.config?.allowedUrlRegex);
   const fallback = source.adapter === "citio_detail_v3"
     ? /^\/podujatia\/[^/]+\/?$/i
-    : /^\/akcia\/[^/]+\/mid\/\d+\/\.html$/i;
-  const links = discoverExactLinks(
-    listing.html,
-    listing.finalUrl,
-    configured ?? fallback,
-    source.max_event_links,
-  );
+    : /^\/akcia\/[^/]+\/mid\/\d+\/[.]html$/i;
+  let links: Array<{ url: string; title: string }>;
+  if (configuredUrl) {
+    const $ = cheerio.load(listing.html);
+    const found = new Map<string, string>();
+    mainScope($).find("a[href]").each((_index: number, element: any) => {
+      const href = $(element).attr("href");
+      if (!href) return;
+      const url = absoluteUrl(href, listing.finalUrl);
+      if (!url || !allowedGenericUrl(source, url, listing.finalUrl) || !configuredUrl.test(url)) return;
+      const title = cleanAnchorTitle($(element).text());
+      if (!title || isBlockedTitle(title)) return;
+      found.set(url, title);
+    });
+    links = [...found.entries()].slice(0, source.max_event_links).map(([url, title]) => ({ url, title }));
+  } else {
+    links = discoverExactLinks(
+      listing.html,
+      listing.finalUrl,
+      configured ?? fallback,
+      source.max_event_links,
+    );
+  }
+
   const candidates: EventCandidate[] = [];
   for (const link of links) {
     try {
       const candidate = source.adapter === "citio_detail_v3"
         ? await parseCitioDetail(source, link.url, link.title)
+        : source.adapter === "generic_detail_v4"
+        ? await parseGenericDetail(source, link.url, link.title)
         : await parseWebygroupDetail(source, link.url, link.title);
       if (candidate) candidates.push(candidate);
     } catch {
-      // The caller records source-level errors only; one broken detail must not stop the batch.
+      // One broken detail must not stop the batch.
     }
   }
   return { discoveredLinks: links.length, candidates };
@@ -1065,7 +1499,9 @@ Deno.serve(async (request) => {
     const sourceCodes = Array.isArray(body.sourceCodes)
       ? body.sourceCodes.filter((value): value is string => typeof value === "string")
       : null;
-    const maxEvents = Math.max(1, Math.min(120, Number(body.maxEvents ?? 60)));
+    const sourceGroup = getString(body.sourceGroup);
+    const includeDisabled = body.includeDisabled === true;
+    const maxEvents = Math.max(1, Math.min(300, Number(body.maxEvents ?? 120)));
     if (!['preview', 'sync'].includes(action)) {
       return jsonResponse({ error: "action musí byť preview alebo sync." }, 400);
     }
@@ -1073,7 +1509,7 @@ Deno.serve(async (request) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const sources = await loadSources(supabase, sourceCodes);
+    const sources = await loadSources(supabase, sourceCodes, sourceGroup, includeDisabled);
     const accepted: EventCandidate[] = [];
     const rejected: Array<JsonObject> = [];
     const sourceStats: Record<string, JsonObject> = {};
@@ -1081,6 +1517,7 @@ Deno.serve(async (request) => {
     for (const source of sources) {
       const stats: JsonObject = {
         adapter: source.adapter,
+        groupCode: source.group_code ?? null,
         listUrl: source.list_url,
         discoveredLinks: 0,
         parsedCandidates: 0,
@@ -1089,32 +1526,47 @@ Deno.serve(async (request) => {
         errors: [],
       };
       sourceStats[source.code] = stats;
+      const sourceStartedAt = new Date().toISOString();
+      const sourceStartedMs = Date.now();
+      let sourceError: string | null = null;
       try {
         const parsed = await parseSource(source);
         stats.discoveredLinks = parsed.discoveredLinks;
         stats.parsedCandidates = parsed.candidates.length;
         for (const candidate of parsed.candidates) {
-          const validation = validateCandidate(candidate, source);
+          const normalizedCandidate = normalizeCandidateDateRange(candidate);
+          const validation = validateCandidate(normalizedCandidate, source);
           if (validation.accepted) {
-            accepted.push(candidate);
+            accepted.push(normalizedCandidate);
             stats.accepted = Number(stats.accepted ?? 0) + 1;
           } else {
             rejected.push({
-              title: candidate.title,
+              title: normalizedCandidate.title,
               sourcePageCode: source.code,
-              sourceUrl: candidate.sourceUrl,
-              startDate: candidate.startDate,
+              sourceUrl: normalizedCandidate.sourceUrl,
+              startDate: normalizedCandidate.startDate,
               reason: validation.reason ?? "unknown",
             });
             stats.rejected = Number(stats.rejected ?? 0) + 1;
           }
         }
       } catch (error) {
+        sourceError = error instanceof Error ? error.message : String(error);
         (stats.errors as unknown[]).push({
           url: source.list_url,
-          message: error instanceof Error ? error.message : String(error),
+          message: sourceError,
         });
       }
+      stats.durationMs = Date.now() - sourceStartedMs;
+      await recordSourceRun(
+        supabase,
+        source,
+        action,
+        sourceStartedAt,
+        Number(stats.durationMs),
+        stats,
+        sourceError,
+      );
     }
 
     const deduped = dedupeCandidates(accepted).slice(0, maxEvents);
@@ -1127,7 +1579,7 @@ Deno.serve(async (request) => {
     if (action === "preview") {
       return jsonResponse({
         action,
-        version: "municipal-parser-v3",
+        version: "municipal-parser-v4",
         sources: sourceStats,
         stats: {
           sourceCount: sources.length,
@@ -1140,7 +1592,7 @@ Deno.serve(async (request) => {
         },
         preview: deduped,
         rejectedPreview: rejected.slice(0, 30),
-        note: "Preview nič nezapísal. V3 používa výhradne presné event URL a zdrojové adaptéry.",
+        note: "Preview nič nezapísal. V4 používa zdrojové adaptéry, generické dátované karty a JSON-LD fallback.",
       });
     }
 
@@ -1161,14 +1613,14 @@ Deno.serve(async (request) => {
 
     return jsonResponse({
       action,
-      version: "municipal-parser-v3",
+      version: "municipal-parser-v4",
       sources: sourceStats,
       stats: syncStats,
       synced,
-      note: "Udalosti boli uložené so stavom review.",
+      note: "Udalosti boli uložené so stavom review. Zdrojové zdravie bolo aktualizované.",
     });
   } catch (error) {
-    console.error("municipal-event-sync-v3:", error);
+    console.error("municipal-event-sync-v4:", error);
     return jsonResponse({
       error: error instanceof Error ? error.message : "Neznáma chyba.",
     }, 500);
