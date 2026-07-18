@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$BaseUrl = "http://127.0.0.1:54321/functions/v1",
     [string]$SyncToken = "local-dev-token",
     [switch]$IncludeCron,
