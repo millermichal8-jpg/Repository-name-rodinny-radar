@@ -83,7 +83,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-sync-token",
 };
 const USER_AGENT =
-  "RodinnyRadarBot/4.0 (+official municipal event indexing; contact: project owner)";
+  "RodinnyRadarBot/5.0 (+official municipal event indexing; contact: project owner)";
 
 const BLOCKED_TITLES = new Set([
   "podujatia",
@@ -125,36 +125,59 @@ const BLOCKED_TITLES = new Set([
 
 const MONTHS: Record<string, number> = {
   januar: 1,
+  januara: 1,
   january: 1,
   leden: 1,
+  ledna: 1,
   februar: 2,
+  februara: 2,
   february: 2,
   unor: 2,
+  unora: 2,
   marec: 3,
+  marca: 3,
   march: 3,
   brezen: 3,
+  brezna: 3,
   april: 4,
+  aprila: 4,
   duben: 4,
+  dubna: 4,
   maj: 5,
+  maja: 5,
   may: 5,
   kveten: 5,
+  kvetna: 5,
   jun: 6,
+  juna: 6,
   june: 6,
   cerven: 6,
+  cervna: 6,
   jul: 7,
+  jula: 7,
   july: 7,
   cervenec: 7,
+  cervence: 7,
   august: 8,
+  augusta: 8,
   srpen: 8,
+  srpna: 8,
   september: 9,
+  septembra: 9,
   zari: 9,
   oktober: 10,
+  oktobra: 10,
   october: 10,
   rijen: 10,
+  rijna: 10,
   november: 11,
+  novembra: 11,
   listopad: 11,
+  listopadu: 11,
   december: 12,
+  decembra: 12,
   prosinec: 12,
+  prosince: 12,
 };
 
 function jsonResponse(body: unknown, status = 200) {
@@ -214,12 +237,16 @@ function isBlockedTitle(title: string) {
 
 function cleanAnchorTitle(value: string) {
   let title = collapseWhitespace(value);
+  const monthWord = "(?:januar|januára|leden|ledna|februar|februára|únor|února|marec|marca|březen|března|april|apríla|duben|dubna|maj|mája|květen|května|jun|júna|červen|června|jul|júla|červenec|července|august|augusta|srpen|srpna|september|septembra|září|oktober|októbra|říjen|října|november|novembra|listopad|listopadu|december|decembra|prosinec|prosince)";
+  title = title.replace(new RegExp(`^\\d{1,2}\\.\\s*${monthWord}(?:\\s+20\\d{2})?(?:\\s*[-–—]\\s*\\d{1,2}\\.\\s*${monthWord}(?:\\s+20\\d{2})?)?\\s+`, "iu"), "");
+  title = title.replace(/^\d{1,2}\.\s*\d{1,2}\.\s*(?:20\d{2})?(?:\s*[-–—]\s*\d{1,2}\.\s*\d{1,2}\.\s*20\d{2})?\s+/u, "");
   title = title.replace(
-    /\s+\d{1,2}\.\s*(?:januar|januára|februar|februára|marec|marca|april|apríla|maj|mája|jun|júna|jul|júla|august|augusta|september|septembra|oktober|októbra|november|novembra|december|decembra)(?:\s*[—–-]\s*\d{1,2}\.\s*(?:[A-Za-zÁ-ž]+))?(?:\s+20\d{2})?.*$/iu,
+    new RegExp(`\\s+\\d{1,2}\\.\\s*${monthWord}(?:\\s*[—–-]\\s*\\d{1,2}\\.\\s*${monthWord})?(?:\\s+20\\d{2})?.*$`, "iu"),
     "",
   );
   title = title.replace(/\s+\d{1,2}\.\s*[-–—]\s*\d{1,2}\.\d{1,2}\.20\d{2}.*$/u, "");
   title = title.replace(/\s+\d{1,2}\.\d{1,2}\.20\d{2}.*$/u, "");
+  title = title.replace(/\s*\/?\s*Detail akce\s*$/iu, "");
   return collapseWhitespace(title);
 }
 
@@ -287,12 +314,37 @@ async function fetchHtml(url: string) {
 }
 
 function mainScope($: cheerio.CheerioAPI) {
-  const selectors = ["main", '[role="main"]', "#content", ".content", ".main-content", "article"];
+  const selectors = [
+    "main",
+    '[role="main"]',
+    "#content",
+    "#main-content",
+    ".main-content",
+    ".site-main",
+    ".content",
+    "article",
+  ];
+  let best: cheerio.Cheerio<cheerio.AnyNode> | null = null;
+  let bestScore = 0;
+
   for (const selector of selectors) {
-    const node = $(selector).first();
-    if (node.length && collapseWhitespace(node.text()).length > 100) return node;
+    for (const element of $(selector).toArray()) {
+      const node = $(element);
+      const textLength = collapseWhitespace(node.text()).length;
+      if (textLength < 100) continue;
+      const linkCount = node.find("a[href]").length;
+      const eventishLinkCount = node.find(
+        'a[href*="/podujatia/"],a[href*="/udalost/"],a[href*="/akce/"],a[href*="/kalendar/"]',
+      ).length;
+      const score = textLength + Math.min(linkCount, 250) * 20 + Math.min(eventishLinkCount, 120) * 120;
+      if (score > bestScore) {
+        best = node;
+        bestScore = score;
+      }
+    }
   }
-  return $("body");
+
+  return best ?? $("body");
 }
 
 function cleanedText($: cheerio.CheerioAPI) {
@@ -389,7 +441,29 @@ function parseHumanDateRange(text: string, yearIfMissing = new Date().getFullYea
   const hour = firstTime?.hour ?? null;
   const minute = firstTime?.minute ?? null;
 
-  let match = clean.match(/\b(\d{1,2})\.(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/);
+  let match = clean.match(/\bod\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})\s*,?\s*do\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})\b/iu);
+  if (match) {
+    return {
+      startDate: isoFromParts(Number(match[3]), Number(match[2]), Number(match[1]), hour, minute),
+      endDate: isoFromParts(Number(match[6]), Number(match[5]), Number(match[4]), 23, 59),
+      allDay: !firstTime,
+    };
+  }
+
+  match = clean.match(/\b(\d{1,2})\.\s*([A-Za-zÁ-ž]+)\s+(20\d{2})\s*[-–—]\s*(\d{1,2})\.\s*([A-Za-zÁ-ž]+)\s+(20\d{2})\b/iu);
+  if (match) {
+    const startMonth = MONTHS[normalizeMonth(match[2])];
+    const endMonth = MONTHS[normalizeMonth(match[5])];
+    if (startMonth && endMonth) {
+      return {
+        startDate: isoFromParts(Number(match[3]), startMonth, Number(match[1]), hour, minute),
+        endDate: isoFromParts(Number(match[6]), endMonth, Number(match[4]), 23, 59),
+        allDay: !firstTime,
+      };
+    }
+  }
+
+  match = clean.match(/\b(\d{1,2})\.(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/);
   if (match) {
     const year = Number(match[5]);
     return {
@@ -706,15 +780,47 @@ function discoverExactLinks(
   return [...links.entries()].slice(0, limit).map(([url, title]) => ({ url, title }));
 }
 
-function extractSectionWindow(text: string, startTitle: string, stopWords: string[]) {
-  const startIndex = normalizeText(text).indexOf(normalizeText(startTitle));
-  let result = startIndex >= 0 ? text.slice(startIndex + startTitle.length) : text;
+function textIndex(text: string, needle: string, useLast = false) {
+  const rawText = text.toLocaleLowerCase("sk");
+  const rawNeedle = needle.toLocaleLowerCase("sk");
+  const rawIndex = useLast ? rawText.lastIndexOf(rawNeedle) : rawText.indexOf(rawNeedle);
+  if (rawIndex >= 0) return rawIndex;
+  const normalizedText = normalizeText(text);
+  const normalizedNeedle = normalizeText(needle);
+  return useLast
+    ? normalizedText.lastIndexOf(normalizedNeedle)
+    : normalizedText.indexOf(normalizedNeedle);
+}
+
+function sliceUntilStopWord(result: string, stopWords: string[]) {
   let stopIndex = result.length;
   for (const word of stopWords) {
-    const index = normalizeText(result).indexOf(normalizeText(word));
+    const index = textIndex(result, word);
     if (index >= 0) stopIndex = Math.min(stopIndex, index);
   }
   return collapseWhitespace(result.slice(0, stopIndex));
+}
+
+function extractSectionWindow(text: string, startTitle: string, stopWords: string[]) {
+  const startIndex = textIndex(text, startTitle);
+  const result = startIndex >= 0 ? text.slice(startIndex + startTitle.length) : text;
+  return sliceUntilStopWord(result, stopWords);
+}
+
+function extractEventWindow(text: string, startTitle: string, stopWords: string[]) {
+  const startIndex = textIndex(text, startTitle, true);
+  const result = startIndex >= 0 ? text.slice(startIndex + startTitle.length) : text;
+  return sliceUntilStopWord(result, stopWords);
+}
+
+function extractLabeledValue(text: string, labels: string[], stopLabels: string[]) {
+  const escapedLabels = labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  const escapedStops = stopLabels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  const pattern = new RegExp(
+    `(?:${escapedLabels})\\s*:?\\s*(.*?)(?=\\s+(?:${escapedStops})\\s*:?|$)`,
+    "iu",
+  );
+  return getString(collapseWhitespace(text.match(pattern)?.[1] ?? ""));
 }
 
 function findImage($: cheerio.CheerioAPI, sourceUrl: string) {
@@ -762,8 +868,11 @@ function parseDateTimeAttribute(value: string | undefined | null): ParsedDateRan
 }
 
 function extractVenueFromText(text: string) {
-  const match = text.match(/(?:Miesto|Místo|Kde|Venue)\s*:?\s*([^|•\n]{2,140})/iu);
-  return match ? collapseWhitespace(match[1]) : null;
+  return extractLabeledValue(
+    text,
+    ["MIESTO AKCE", "Miesto", "Místo", "Kde", "Venue"],
+    ["Adresa", "Organizátor", "Organizator", "Telefon", "Vstupenky", "Informácie", "Informace", "Popis", "Poslední změna", "Ďalšie", "Další"],
+  );
 }
 
 function selectorText(
@@ -802,13 +911,18 @@ function bestGenericTitle(
   const configured = source.config?.titleSelector
     ? getString($(source.config.titleSelector).first().text())
     : null;
-  const title = cleanAnchorTitle(
-    configured ??
-      getString($("main h1, article h1, h1").first().text()) ??
-      getString($('meta[property="og:title"]').attr("content")) ??
-      fallbackTitle,
-  );
-  return title && !isBlockedTitle(title) ? title : null;
+  const candidates = [
+    configured,
+    fallbackTitle,
+    getString($("main h1, main h2, article h1, article h2, h1, h2").first().text()),
+    getString($('meta[property="og:title"]').attr("content")),
+  ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const title = cleanAnchorTitle(candidate);
+    if (title && !isBlockedTitle(title)) return title;
+  }
+  return null;
 }
 
 async function parseGenericDetail(
@@ -830,26 +944,33 @@ async function parseGenericDetail(
   if (!title) return null;
   const scope = mainScope($);
   const fullText = cleanedText($);
+  const eventWindow = extractEventWindow(fullText, title, [
+    "Podobné",
+    "Súvisiace",
+    "Další akce",
+    "Ďalšie podujatia",
+    "Ďalšie podujatia typu",
+    "Kontakt",
+    "Technický prevádzkovateľ",
+    "Turistická informační centra",
+  ]);
   const configuredDescription = selectorText($, scope, source.config?.descriptionSelector);
   const metaDescription = getString($('meta[name="description"]').attr("content")) ??
     getString($('meta[property="og:description"]').attr("content"));
   const description = collapseWhitespace(
-    configuredDescription ?? metaDescription ?? extractSectionWindow(fullText, title, [
-      "Podobné",
-      "Súvisiace",
-      "Další akce",
-      "Ďalšie podujatia",
-      "Kontakt",
-      "Technický prevádzkovateľ",
-    ]),
+    configuredDescription ??
+      (eventWindow.length >= 60 ? eventWindow : null) ??
+      metaDescription ??
+      fullText,
   );
 
   const configuredDateText = selectorText($, scope, source.config?.dateSelector);
   const dateTimeAttr = scope.find("time[datetime]").first().attr("datetime");
   const parsedAttr = parseDateTimeAttribute(dateTimeAttr);
+  const dateProbe = collapseWhitespace(`${configuredDateText ?? ""} ${seed?.text ?? ""} ${eventWindow.slice(0, 2200)}`);
   const date = parsedAttr?.startDate
     ? parsedAttr
-    : parseHumanDateRange(configuredDateText ?? `${seed?.text ?? ""} ${fullText.slice(0, 1800)}`);
+    : parseHumanDateRange(dateProbe);
   if (!date.startDate && seed?.date.startDate) {
     date.startDate = seed.date.startDate;
     date.endDate = seed.date.endDate;
@@ -858,7 +979,7 @@ async function parseGenericDetail(
   if (!date.startDate) return null;
 
   const venueName = selectorText($, scope, source.config?.venueSelector) ??
-    extractVenueFromText(`${seed?.text ?? ""} ${fullText.slice(0, 2200)}`) ??
+    extractVenueFromText(`${eventWindow.slice(0, 2600)} ${seed?.text ?? ""}`) ??
     seed?.venueName ??
     source.default_city;
   const imageUrl = selectorImage($, scope, source.config?.imageSelector, finalUrl) ??
@@ -905,8 +1026,25 @@ async function parseGenericDetail(
       seedText: truncate(seed?.text ?? null, 1200),
       configuredDateText,
       dateTimeAttr,
+      eventWindow: truncate(eventWindow, 1800),
     },
   };
+}
+
+function countAllowedLinksInNode(
+  $: cheerio.CheerioAPI,
+  node: cheerio.Cheerio<cheerio.AnyNode>,
+  source: SourcePage,
+  finalUrl: string,
+) {
+  const urls = new Set<string>();
+  node.find("a[href]").each((_index: number, element: any) => {
+    const href = $(element).attr("href");
+    if (!href) return;
+    const url = absoluteUrl(href, finalUrl);
+    if (url && allowedGenericUrl(source, url, finalUrl)) urls.add(url);
+  });
+  return urls.size;
 }
 
 function findGenericCard(
@@ -920,10 +1058,21 @@ function findGenericCard(
   const sourceUrl = absoluteUrl(href, finalUrl);
   if (!sourceUrl || !allowedGenericUrl(source, sourceUrl, finalUrl)) return null;
 
+  const anchorText = collapseWhitespace(anchor.text());
+  const anchorHeading = getString(anchor.find("h1,h2,h3,h4,h5,strong").first().text());
+  const anchorDate = parseHumanDateRange(anchorText);
+  const anchorTitle = cleanAnchorTitle(anchorHeading ?? anchorText);
+  if (anchorTitle && !isBlockedTitle(anchorTitle) && anchorDate.startDate) {
+    const venueName = extractVenueFromText(anchorText);
+    const imageUrl = selectorImage($, anchor, source.config?.imageSelector ?? "img", finalUrl);
+    return { sourceUrl, title: anchorTitle, text: anchorText, date: anchorDate, venueName, imageUrl };
+  }
+
   let node = source.config?.cardSelector ? anchor.closest(source.config.cardSelector) : anchor.parent();
   for (let depth = 0; depth < 7 && node.length; depth += 1) {
     const text = collapseWhitespace(node.text());
-    if (text.length >= 12 && text.length <= 2600) {
+    const eventLinkCount = countAllowedLinksInNode($, node, source, finalUrl);
+    if (text.length >= 12 && text.length <= 2600 && eventLinkCount >= 1 && eventLinkCount <= 3) {
       const configuredTitle = selectorText($, node, source.config?.titleSelector);
       const headingTitle = getString(node.find("h1,h2,h3,h4").first().text());
       const title = cleanAnchorTitle(configuredTitle ?? headingTitle ?? anchor.text());
@@ -1021,8 +1170,8 @@ async function parseCitioDetail(
   const title = cleanAnchorTitle(anchorTitle);
   if (isBlockedTitle(title)) return null;
   const text = cleanedText($);
-  const eventWindow = extractSectionWindow(text, title, ["Informácie", "Podobné", "Publikované"]);
-  const date = parseHumanDateRange(eventWindow.slice(0, 500));
+  const eventWindow = extractEventWindow(text, title, ["Podobné", "Publikované", "Technický prevádzkovateľ"]);
+  const date = parseHumanDateRange(eventWindow.slice(0, 1800));
   if (!date.startDate) return null;
   const price = parsePrice(eventWindow);
   const canceled = isCanceledText(`${title} ${eventWindow}`);
@@ -1594,7 +1743,7 @@ Deno.serve(async (request) => {
     if (action === "preview") {
       return jsonResponse({
         action,
-        version: "municipal-parser-v4",
+        version: "municipal-parser-v5",
         sources: sourceStats,
         stats: {
           sourceCount: sources.length,
@@ -1607,7 +1756,7 @@ Deno.serve(async (request) => {
         },
         preview: deduped,
         rejectedPreview: rejected.slice(0, 30),
-        note: "Preview nič nezapísal. V4 používa zdrojové adaptéry, generické dátované karty a JSON-LD fallback.",
+        note: "Preview nič nezapísal. V5 pridáva card-seeded recovery a robustnejšie čítanie detailov.",
       });
     }
 
@@ -1628,7 +1777,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse({
       action,
-      version: "municipal-parser-v4",
+      version: "municipal-parser-v5",
       sources: sourceStats,
       stats: syncStats,
       synced,
