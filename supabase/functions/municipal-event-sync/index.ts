@@ -1428,11 +1428,12 @@ async function parseSource(source: SourcePage) {
     return {
       discoveredLinks: 0,
       candidates: await parseTicketwareCards(source, listing.html, listing.finalUrl),
+      detailErrors: [] as JsonObject[],
     };
   }
   if (source.adapter === "generic_cards_v4") {
     const candidates = await parseGenericCards(source, listing.html, listing.finalUrl);
-    return { discoveredLinks: candidates.length, candidates };
+    return { discoveredLinks: candidates.length, candidates, detailErrors: [] as JsonObject[] };
   }
 
   const configured = safeRegex(source.config?.allowedPathRegex);
@@ -1464,6 +1465,7 @@ async function parseSource(source: SourcePage) {
   }
 
   const candidates: EventCandidate[] = [];
+  const detailErrors: JsonObject[] = [];
   for (const link of links) {
     try {
       const candidate = source.adapter === "citio_detail_v3"
@@ -1472,11 +1474,16 @@ async function parseSource(source: SourcePage) {
         ? await parseGenericDetail(source, link.url, link.title)
         : await parseWebygroupDetail(source, link.url, link.title);
       if (candidate) candidates.push(candidate);
-    } catch {
-      // One broken detail must not stop the batch.
+    } catch (error) {
+      // One broken detail must not stop the batch, but it must remain visible in diagnostics.
+      detailErrors.push({
+        url: link.url,
+        title: link.title,
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
   }
-  return { discoveredLinks: links.length, candidates };
+  return { discoveredLinks: links.length, candidates, detailErrors };
 }
 
 Deno.serve(async (request) => {
@@ -1523,6 +1530,7 @@ Deno.serve(async (request) => {
         parsedCandidates: 0,
         accepted: 0,
         rejected: 0,
+        rejectedReasons: {},
         errors: [],
       };
       sourceStats[source.code] = stats;
@@ -1533,6 +1541,9 @@ Deno.serve(async (request) => {
         const parsed = await parseSource(source);
         stats.discoveredLinks = parsed.discoveredLinks;
         stats.parsedCandidates = parsed.candidates.length;
+        if (parsed.detailErrors.length > 0) {
+          (stats.errors as unknown[]).push(...parsed.detailErrors);
+        }
         for (const candidate of parsed.candidates) {
           const normalizedCandidate = normalizeCandidateDateRange(candidate);
           const validation = validateCandidate(normalizedCandidate, source);
@@ -1540,14 +1551,18 @@ Deno.serve(async (request) => {
             accepted.push(normalizedCandidate);
             stats.accepted = Number(stats.accepted ?? 0) + 1;
           } else {
+            const rejectionReason = validation.reason ?? "unknown";
             rejected.push({
               title: normalizedCandidate.title,
               sourcePageCode: source.code,
               sourceUrl: normalizedCandidate.sourceUrl,
               startDate: normalizedCandidate.startDate,
-              reason: validation.reason ?? "unknown",
+              reason: rejectionReason,
             });
             stats.rejected = Number(stats.rejected ?? 0) + 1;
+            const sourceRejectedReasons = (stats.rejectedReasons ?? {}) as JsonObject;
+            sourceRejectedReasons[rejectionReason] = Number(sourceRejectedReasons[rejectionReason] ?? 0) + 1;
+            stats.rejectedReasons = sourceRejectedReasons;
           }
         }
       } catch (error) {
