@@ -206,6 +206,8 @@ function isBlockedTitle(title: string) {
   const normalized = normalizeText(title);
   if (normalized.length < 4 || normalized.length > 180) return true;
   if (BLOCKED_TITLES.has(normalized)) return true;
+  if (/\bodkaz na titulni stranku\b/i.test(normalized)) return true;
+  if (/\boficialni web mestske casti\b/i.test(normalized)) return true;
   return /^(strana\s+\d+|cookies?|nastavenia cookies|za obsah zodpoveda|technicky prevadzkovatel|zobrazit vsetky podujatia)$/i
     .test(normalized);
 }
@@ -337,15 +339,47 @@ function isoFromParts(
   return `${year}-${pad(month)}-${pad(day)}T${pad(safeHour)}:${pad(safeMinute)}:00${bratislavaOffset(year, month, day)}`;
 }
 
+function extractTimes(text: string) {
+  const matches: Array<{ hour: number; minute: number; index: number }> = [];
+
+  for (const match of text.matchAll(/\b([01]?\d|2[0-3]):(\d{2})\b/g)) {
+    matches.push({
+      hour: Number(match[1]),
+      minute: Number(match[2]),
+      index: match.index ?? 0,
+    });
+  }
+
+  for (const match of text.matchAll(/\b([01]?\d|2[0-3])\.(\d{2})(?!\.)\b/g)) {
+    const index = match.index ?? 0;
+    const before = text.slice(Math.max(0, index - 3), index);
+    const after = text.slice(index + match[0].length, index + match[0].length + 6);
+
+    // Bodka sa v SK/CZ často používa aj v dátume (napr. 18.07.2026).
+    // Takýto zápis nesmie byť omylom považovaný za čas 18:07.
+    if (/\.\s*$/.test(before) || /^\s*\.\s*\d/.test(after)) continue;
+
+    matches.push({
+      hour: Number(match[1]),
+      minute: Number(match[2]),
+      index,
+    });
+  }
+
+  return matches
+    .filter((item) => item.minute >= 0 && item.minute <= 59)
+    .sort((a, b) => a.index - b.index);
+}
+
 function parseTime(text: string) {
-  const match = text.match(/\b(?:o\s+|od\s+)?([01]?\d|2[0-3])[:.](\d{2})\b/i);
-  return match ? { hour: Number(match[1]), minute: Number(match[2]) } : null;
+  const [first] = extractTimes(text);
+  return first ? { hour: first.hour, minute: first.minute } : null;
 }
 
 function parseSecondTime(text: string) {
-  const matches = [...text.matchAll(/\b([01]?\d|2[0-3])[:.](\d{2})\b/g)];
+  const matches = extractTimes(text);
   if (matches.length < 2) return null;
-  return { hour: Number(matches[1][1]), minute: Number(matches[1][2]) };
+  return { hour: matches[1].hour, minute: matches[1].minute };
 }
 
 function parseHumanDateRange(text: string, yearIfMissing = new Date().getFullYear()): ParsedDateRange {
@@ -1224,6 +1258,41 @@ async function parseTicketwareCards(
   return output.slice(0, source.max_event_links);
 }
 
+function normalizeCandidateDateRange(candidate: EventCandidate): EventCandidate {
+  if (!candidate.startDate || !candidate.endDate) return candidate;
+
+  const start = new Date(candidate.startDate);
+  const end = new Date(candidate.endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return { ...candidate, endDate: null };
+  }
+
+  if (end.getTime() >= start.getTime()) return candidate;
+
+  // Reálny nočný program môže končiť po polnoci. V takom prípade posunieme
+  // koniec o deň. Pri ostatných neplatných rozsahoch koniec radšej zahodíme,
+  // aby databáza prijala udalosť bez vymysleného času ukončenia.
+  const startHour = start.getHours();
+  const endHour = end.getHours();
+  if (!candidate.allDay && startHour >= 18 && endHour <= 6) {
+    const correctedEnd = new Date(end);
+    correctedEnd.setDate(correctedEnd.getDate() + 1);
+    if (correctedEnd.getTime() >= start.getTime()) {
+      return {
+        ...candidate,
+        endDate: correctedEnd.toISOString(),
+        warnings: [...new Set([...candidate.warnings, "Koniec podujatia bol posunutý za polnoc"])],
+      };
+    }
+  }
+
+  return {
+    ...candidate,
+    endDate: null,
+    warnings: [...new Set([...candidate.warnings, "Neplatný koniec podujatia bol odstránený"])],
+  };
+}
+
 function validateCandidate(candidate: EventCandidate, source: SourcePage): ValidationResult {
   if (isBlockedTitle(candidate.title)) return { accepted: false, reason: "blocked_title" };
   if (candidate.canceled) return { accepted: false, reason: "canceled" };
@@ -1465,16 +1534,17 @@ Deno.serve(async (request) => {
         stats.discoveredLinks = parsed.discoveredLinks;
         stats.parsedCandidates = parsed.candidates.length;
         for (const candidate of parsed.candidates) {
-          const validation = validateCandidate(candidate, source);
+          const normalizedCandidate = normalizeCandidateDateRange(candidate);
+          const validation = validateCandidate(normalizedCandidate, source);
           if (validation.accepted) {
-            accepted.push(candidate);
+            accepted.push(normalizedCandidate);
             stats.accepted = Number(stats.accepted ?? 0) + 1;
           } else {
             rejected.push({
-              title: candidate.title,
+              title: normalizedCandidate.title,
               sourcePageCode: source.code,
-              sourceUrl: candidate.sourceUrl,
-              startDate: candidate.startDate,
+              sourceUrl: normalizedCandidate.sourceUrl,
+              startDate: normalizedCandidate.startDate,
               reason: validation.reason ?? "unknown",
             });
             stats.rejected = Number(stats.rejected ?? 0) + 1;
