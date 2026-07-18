@@ -21,7 +21,11 @@ $secureToken = ConvertTo-SecureString -String $encryptedToken
 $credential = [System.Management.Automation.PSCredential]::new('sync', $secureToken)
 $syncToken = $credential.GetNetworkCredential().Password
 
-$fixture = Get-Content $FixturePath -Raw | ConvertFrom-Json
+$fixtureJson = [System.IO.File]::ReadAllText(
+  (Resolve-Path $FixturePath).Path,
+  [System.Text.Encoding]::UTF8
+)
+$fixture = $fixtureJson | ConvertFrom-Json
 $body = @{
   action = 'preview'
   provider = $Provider
@@ -29,14 +33,16 @@ $body = @{
   events = @($fixture.events)
 } | ConvertTo-Json -Depth 30
 
+$bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($body)
+
 $response = Invoke-RestMethod `
   -Method Post `
   -Uri "$FunctionBaseUrl/partner-ticket-sync" `
   -Headers @{
-    'Content-Type' = 'application/json'
+    'Content-Type' = 'application/json; charset=utf-8'
     'X-Sync-Token' = $syncToken
   } `
-  -Body $body `
+  -Body $bodyBytes `
   -TimeoutSec 180
 
 Write-Host "`n--- PARTNER FEED PREVIEW ---" -ForegroundColor Cyan
