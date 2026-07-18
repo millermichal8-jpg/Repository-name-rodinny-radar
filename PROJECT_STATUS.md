@@ -1,17 +1,17 @@
-# RodinnĂ˝ radar â€“ stav projektu
+# Rodinný radar – stav projektu
 
-**PoslednĂˇ overenĂˇ aktualizĂˇcia:** 18. 7. 2026  
-**HlavnĂˇ vetva:** `main`  
-**GitHub:** sĂşkromnĂ˝ repozitĂˇr, lokĂˇlna vetva sleduje `origin/main`
+**Posledná overená aktualizácia:** 18. 7. 2026  
+**Hlavná vetva:** `main`  
+**GitHub:** súkromný repozitár, lokálna vetva sleduje `origin/main`
 
-## CieÄľ
+## Cieľ
 
-MobilnĂˇ aplikĂˇcia pre rodiÄŤov, ktorĂˇ nĂˇjde trvalĂ© vĂ˝lety aj aktuĂˇlne podujatia
-podÄľa mesta, vzdialenosti, dĂˇtumu, poÄŤtu ÄľudĂ­ a veku detĂ­.
+Mobilná aplikácia pre rodičov, ktorá nájde trvalé výlety aj aktuálne podujatia
+podľa mesta, vzdialenosti, dátumu, počtu ľudí a veku detí.
 
 ---
 
-## TechnolĂłgie
+## Technológie
 
 - React Native
 - Expo SDK 54
@@ -20,215 +20,229 @@ podÄľa mesta, vzdialenosti, dĂˇtumu, poÄŤtu ÄľudĂ­ a veku detĂ­.
 - Supabase
 - Supabase Edge Functions
 - PostgreSQL + PostGIS
-- Docker Desktop + lokĂˇlny Supabase
+- Docker Desktop + lokálny Supabase
 - Google Places API
 - Ticketmaster Discovery API
 - Git + GitHub
 
 ---
 
-## ÄŚo funguje
+## Čo funguje
 
-### MobilnĂˇ aplikĂˇcia
+### Mobilná aplikácia
 
-- aplikĂˇcia sa spĂşĹˇĹĄa v Expo Go
-- letnĂ˝ vizuĂˇlny ĹˇtĂ˝l
-- zadanie mesta s naĹˇepkĂˇvanĂ­m miest a obcĂ­ SK/CZ
-- poÄŤet dospelĂ˝ch
-- poÄŤet detĂ­
-- samostatnĂ˝ vek kaĹľdĂ©ho dieĹĄaĹĄa
-- vĂ˝ber maximĂˇlnej vzdialenosti
-- trvalĂ© vĂ˝lety z Google Places
-- rozkliknuteÄľnĂ˝ detail vĂ˝letu
-- adresa, hodnotenie, web, telefĂłn a otvĂˇracie hodiny pri vĂ˝lete
-- sekcia **AktuĂˇlne podujatia**
-- reĂˇlne podujatia naÄŤĂ­tanĂ© z online katalĂłgu
-- rozkliknuteÄľnĂ˝ detail podujatia
+- aplikácia sa spúšťa v Expo Go
+- letný vizuálny štýl
+- zadanie mesta s našepkávaním miest a obcí SK/CZ
+- počet dospelých
+- počet detí
+- samostatný vek každého dieťaťa
+- výber maximálnej vzdialenosti
+- trvalé výlety z Google Places
+- rozkliknuteľný detail výletu
+- adresa, hodnotenie, web, telefón a otváracie hodiny pri výlete
+- sekcia **Aktuálne podujatia**
+- reálne podujatia načítané z online katalógu
+- rozkliknuteľný detail podujatia
 - filtre:
-  - VĹˇetky
+  - Všetky
   - Dnes
-  - Tento vĂ­kend
+  - Tento víkend
   - Zadarmo
-- radenie podÄľa termĂ­nu alebo vzdialenosti
-- otvorenie oficiĂˇlnej strĂˇnky alebo odkazu na lĂ­stky
+- radenie podľa termínu alebo vzdialenosti
+- otvorenie oficiálnej stránky alebo odkazu na lístky
 
-### DatabĂˇza a katalĂłg V2
+### Databáza a katalóg V2
 
-- univerzĂˇlny katalĂłg pre atrakcie aj podujatia
-- miesta a areĂˇly
-- organizĂˇtori
-- zĂˇĹľitky
-- konkrĂ©tne termĂ­ny
+- univerzálny katalóg pre atrakcie aj podujatia
+- miesta a areály
+- organizátori
+- zážitky
+- konkrétne termíny
 - vstupenky a ceny
-- mĂ©diĂˇ
+- médiá
 - viac zdrojov jednej akcie
-- raw zdrojovĂ© zĂˇznamy
-- histĂłria synchronizĂˇciĂ­
-- kandidĂˇti na duplicity
-- histĂłria cien
+- raw zdrojové záznamy
+- história synchronizácií
+- kandidáti na duplicity
+- história cien
 - kontrola kvality
-- jednotnĂ˝ `experience_feed`
-- geografickĂ© vyhÄľadĂˇvanie cez PostGIS
+- jednotný `experience_feed`
+- geografické vyhľadávanie cez PostGIS
 
 ### Ticketmaster
 
-- Ticketmaster Discovery API je pripojenĂ©
-- preview reĹľim bez zĂˇpisu funguje
-- ostrĂ˝ sync do katalĂłgu funguje
-- ÄŤeskĂ© podujatia sa ĂşspeĹˇne zapisujĂş
-- Slovensko momentĂˇlne cez Ticketmaster vracia 0 udalostĂ­
-- Ticketmaster ostĂˇva doplnkovĂ˝ zdroj, nie hlavnĂ˝ slovenskĂ˝ zdroj
+- Ticketmaster Discovery API je pripojené
+- preview režim bez zápisu funguje
+- ostrý sync do katalógu funguje
+- české podujatia sa úspešne zapisujú
+- Slovensko momentálne cez Ticketmaster vracia 0 udalostí
+- Ticketmaster ostáva doplnkový zdroj, nie hlavný slovenský zdroj
 
-### SlovenskĂ© mestskĂ© a kultĂşrne zdroje
+### Slovenské mestské a kultúrne zdroje
 
-Municipal parser V3 je nasadenĂ˝ online a funguje pre:
+Municipal parser V3 je nasadený online a funguje pre:
 
 - Bojnice
 - Zvolen
-- KultĂşrne centrum BanskĂˇ Ĺ tiavnica
+- Kultúrne centrum Banská Štiavnica
 
 Parser:
 
-- vyhÄľadĂˇva detailnĂ© strĂˇnky podujatĂ­
-- ÄŤĂ­ta Schema.org Event/Offer, keÄŹ sĂş dostupnĂ©
-- pouĹľĂ­va HTML fallback
-- zĂ­skava nĂˇzov, termĂ­n, mesto, obrĂˇzok a cenu alebo vstup zdarma
-- filtruje starĂ© a neplatnĂ© poloĹľky
-- prideÄľuje skĂłre kvality
-- robĂ­ zĂˇkladnĂş deduplikĂˇciu
-- zapisuje udalosti do katalĂłgu V2
-- overenĂ© udalosti sĂş publikovanĂ© online
-- mobilnĂ˝ `experience-feed` ich vracia aplikĂˇcii
+- vyhľadáva detailné stránky podujatí
+- číta Schema.org Event/Offer, keď sú dostupné
+- používa HTML fallback
+- získava názov, termín, mesto, obrázok a cenu alebo vstup zdarma
+- filtruje staré a neplatné položky
+- prideľuje skóre kvality
+- robí základnú deduplikáciu
+- zapisuje udalosti do katalógu V2
+- overené udalosti sú publikované online
+- mobilný `experience-feed` ich vracia aplikácii
 
-### VĂ˝vojovĂ© prostredie a automatizĂˇcia
+### Vývojové prostredie a automatizácia
 
-- Git repozitĂˇr je inicializovanĂ˝
-- projekt je pushnutĂ˝ na sĂşkromnĂ˝ GitHub
-- existuje bezpeÄŤnĂ˝ nĂˇvratovĂ˝ baseline commit
-- Supabase CLI je nainĹˇtalovanĂ© lokĂˇlne
-- vĹˇetky Edge Functions sĂş v `supabase/functions`
-- databĂˇzovĂ© migrĂˇcie sĂş v `supabase/migrations`
-- referenÄŤnĂ© dĂˇta sĂş v `supabase/seed.sql`
-- lokĂˇlny Supabase beĹľĂ­ cez Docker
-- databĂˇza sa dĂˇ vytvoriĹĄ od nuly cez migrĂˇcie a seed
-- `db reset` bol ĂşspeĹˇne overenĂ˝
-- lokĂˇlne testovacie vĂ˝stupy a secrets sĂş ignorovanĂ© v Gite
-- produkÄŤnĂ© migrĂˇcie aj Edge Functions sa dajĂş nasadzovaĹĄ cez CLI
-
----
-
-## ÄŚo zatiaÄľ nefunguje alebo nie je dokonÄŤenĂ©
-
-### Pokrytie dĂˇt
-
-- databĂˇza podujatĂ­ je stĂˇle malĂˇ
-- BanskĂˇ Bystrica zatiaÄľ naĹˇla odkazy, ale neprijala pouĹľiteÄľnĂ© udalosti
-- chĂ˝ba vlastnĂ˝ adaptĂ©r pre BanskĂş Bystricu
-- chĂ˝ba vĂ¤ÄŤĹˇina slovenskĂ˝ch miest, regiĂłnov a kultĂşrnych centier
-- chĂ˝ba systematickĂ© pokrytie vĹˇetkĂ˝ch 8 slovenskĂ˝ch krajov
-- ÄŤeskĂ© mestskĂ© a regionĂˇlne zdroje eĹˇte nie sĂş pripojenĂ©
-- Ticketportal eĹˇte nie je pripojenĂ˝
-- Predpredaj.sk eĹˇte nie je pripojenĂ˝
-- GoOut eĹˇte nie je pripojenĂ˝
-- TicketLIVE eĹˇte nie je pripojenĂ˝
-- Eventim eĹˇte nie je pripojenĂ˝
-- Tavily eĹˇte nie je pripojenĂ©
-- Firecrawl eĹˇte nie je pripojenĂ˝
-- PDF programy sa eĹˇte univerzĂˇlne nespracĂşvajĂş
-- JavaScriptovĂ© kalendĂˇre eĹˇte nemajĂş univerzĂˇlny fallback
-- akcie zo sociĂˇlnych sietĂ­ a neverejnĂ˝ch zdrojov nie sĂş pokrytĂ©
-
-### DeduplikĂˇcia a kvalita
-
-- deduplikĂˇcia je zatiaÄľ zĂˇkladnĂˇ
-- rovnakĂˇ akcia z mesta, organizĂˇtora a ticketovĂ©ho portĂˇlu sa eĹˇte nemusĂ­ vĹľdy spojiĹĄ
-- chĂ˝ba automatickĂ˝ review panel
-- chĂ˝ba sprĂˇva chĂ˝b a ruÄŤnĂ© schvaÄľovanie podozrivĂ˝ch poloĹľiek
-- chĂ˝ba monitoring nefunkÄŤnĂ˝ch zdrojov
-- chĂ˝ba automatickĂ© vyradenie dlhodobo nefunkÄŤnĂ˝ch zdrojov
-- chĂ˝ba automatickĂˇ kontrola zruĹˇenĂ˝ch a presunutĂ˝ch podujatĂ­
-- histĂłria cien je pripravenĂˇ, ale eĹˇte sa pravidelne neplnĂ­
-
-### MobilnĂˇ aplikĂˇcia
-
-- fotografie podujatĂ­ a vĂ˝letov nie sĂş vyrieĹˇenĂ© jednotne
-- karty eĹˇte nie sĂş finĂˇlne dizajnovo doladenĂ©
-- obÄľĂşbenĂ© poloĹľky sa neukladajĂş trvalo do ĂşÄŤtu
-- pouĹľĂ­vateÄľskĂ© ĂşÄŤty a prihlĂˇsenie nie sĂş hotovĂ©
-- synchronizĂˇcia medzi zariadeniami nie je hotovĂˇ
-- vzdialenosĹĄ je pri ÄŤasti obsahu stĂˇle iba pribliĹľnĂˇ
-- reĂˇlna cesta autom nie je dokonÄŤenĂˇ pre vĹˇetok obsah
-- vlak, autobus, prestupy a ÄŤas chĂ´dze nie sĂş dokonÄŤenĂ©
-- chĂ˝ba finĂˇlna kategorizĂˇcia podÄľa veku detĂ­
-- chĂ˝ba komplexnĂ© filtrovanie podÄľa kategĂłrie, ceny a dostupnosti
-- chĂ˝ba mapa vĂ˝sledkov
-- chĂ˝ba finĂˇlne prĂˇzdne/loading/error UI
-- chĂ˝ba produkÄŤnĂ˝ onboarding
-
-### Produkcia a automatickĂ© behy
-
-- Cron synchronizĂˇcie eĹˇte nie sĂş finĂˇlne nastavenĂ© pre vĹˇetky zdroje
-- chĂ˝ba centrĂˇlny orchestrĂˇtor dĂˇvok
-- chĂ˝ba automatickĂ˝ retry pri doÄŤasnom vĂ˝padku webu
-- chĂ˝ba upozornenie pri chybe konektora
-- chĂ˝ba dashboard spotreby API a kvĂłt
-- chĂ˝ba oddelenĂ© staging prostredie
-- chĂ˝ba CI/CD kontrola pri kaĹľdom commite
-- chĂ˝bajĂş automatickĂ© integraÄŤnĂ© testy pre vĹˇetky konektory
-
-### PrĂˇvne a obchodnĂ© veci
-
-- chĂ˝bajĂş pravidlĂˇ atribĂşcie zdrojov
-- chĂ˝bajĂş partnerskĂ© dohody s ticketovĂ˝mi portĂˇlmi
-- chĂ˝bajĂş podmienky pouĹľĂ­vania
-- chĂ˝ba ochrana osobnĂ˝ch Ăşdajov a zĂˇsady sĂşkromia
-- monetizĂˇcia a predplatnĂ© nie sĂş implementovanĂ©
+- Git repozitár je inicializovaný
+- projekt je pushnutý na súkromný GitHub
+- existuje bezpečný návratový baseline commit
+- Supabase CLI je nainštalované lokálne
+- všetky Edge Functions sú v `supabase/functions`
+- databázové migrácie sú v `supabase/migrations`
+- referenčné dáta sú v `supabase/seed.sql`
+- lokálny Supabase beží cez Docker
+- databáza sa dá vytvoriť od nuly cez migrácie a seed
+- `db reset` bol úspešne overený
+- lokálne testovacie výstupy a secrets sú ignorované v Gite
+- produkčné migrácie aj Edge Functions sa dajú nasadzovať cez CLI
 
 ---
 
-## AktuĂˇlny hlavnĂ˝ cieÄľ
+## Čo zatiaľ nefunguje alebo nie je dokončené
 
-Najprv vĂ˝razne zvĂ¤ÄŤĹˇiĹĄ databĂˇzu podujatĂ­.
+### Pokrytie dát
 
-Poradie:
+- databáza podujatí je stále malá
+- Banská Bystrica zatiaľ našla odkazy, ale neprijala použiteľné udalosti
+- chýba vlastný adaptér pre Banskú Bystricu
+- chýba väčšina slovenských miest, regiónov a kultúrnych centier
+- základné pokrytie všetkých 8 slovenských krajov je pripojené
+- prvá vlna českých mestských a regionálnych zdrojov je pripojená
+- Ticketportal ešte nie je pripojený
+- Predpredaj.sk ešte nie je pripojený
+- GoOut ešte nie je pripojený
+- TicketLIVE ešte nie je pripojený
+- Eventim ešte nie je pripojený
+- Tavily ešte nie je pripojené
+- Firecrawl ešte nie je pripojený
+- PDF programy sa ešte univerzálne nespracúvajú
+- JavaScriptové kalendáre ešte nemajú univerzálny fallback
+- akcie zo sociálnych sietí a neverejných zdrojov nie sú pokryté
 
-1. pridaĹĄ zdroje pre vĹˇetkĂ˝ch 8 slovenskĂ˝ch krajov
-2. pridaĹĄ prvĂş vlnu ÄŤeskĂ˝ch miest a regiĂłnov
-3. vytvoriĹĄ dĂˇvkovĂ˝ orchestrĂˇtor
-4. vytvoriĹĄ report fungujĂşcich a nefunkÄŤnĂ˝ch zdrojov
-5. rozĹˇĂ­riĹĄ deduplikĂˇciu
-6. nastaviĹĄ automatickĂ© pravidelnĂ© synchronizĂˇcie
-7. aĹľ potom jednotne rieĹˇiĹĄ:
-   - fotografie
-   - krajĹˇie karty
-   - trvalĂ© obÄľĂşbenĂ© poloĹľky
+### Deduplikácia a kvalita
+
+- deduplikácia je zatiaľ základná
+- rovnaká akcia z mesta, organizátora a ticketového portálu sa ešte nemusí vždy spojiť
+- chýba automatický review panel
+- chýba správa chýb a ručné schvaľovanie podozrivých položiek
+- chýba monitoring nefunkčných zdrojov
+- chýba automatické vyradenie dlhodobo nefunkčných zdrojov
+- chýba automatická kontrola zrušených a presunutých podujatí
+- história cien je pripravená, ale ešte sa pravidelne neplní
+
+### Mobilná aplikácia
+
+- fotografie podujatí a výletov nie sú vyriešené jednotne
+- karty ešte nie sú finálne dizajnovo doladené
+- obľúbené položky sa neukladajú trvalo do účtu
+- používateľské účty a prihlásenie nie sú hotové
+- synchronizácia medzi zariadeniami nie je hotová
+- vzdialenosť je pri časti obsahu stále iba približná
+- reálna cesta autom nie je dokončená pre všetok obsah
+- vlak, autobus, prestupy a čas chôdze nie sú dokončené
+- chýba finálna kategorizácia podľa veku detí
+- chýba komplexné filtrovanie podľa kategórie, ceny a dostupnosti
+- chýba mapa výsledkov
+- chýba finálne prázdne/loading/error UI
+- chýba produkčný onboarding
+
+### Produkcia a automatické behy
+
+- denný Cron je aktívny pre 22 overených slovenských a českých zdrojov
+- centrálny dávkový orchestrátor je nasadený online
+- základný automatický retry pri dočasnom výpadku webu funguje
+- chýba upozornenie pri chybe konektora
+- chýba dashboard spotreby API a kvót
+- chýba oddelené staging prostredie
+- chýba CI/CD kontrola pri každom commite
+- chýbajú automatické integračné testy pre všetky konektory
+
+### Právne a obchodné veci
+
+- chýbajú pravidlá atribúcie zdrojov
+- chýbajú partnerské dohody s ticketovými portálmi
+- chýbajú podmienky používania
+- chýba ochrana osobných údajov a zásady súkromia
+- monetizácia a predplatné nie sú implementované
 
 ---
 
-## NajbliĹľĹˇĂ­ pracovnĂ˝ balĂ­k
+## Aktuálny hlavný cieľ
 
-**Data Expansion V1**
+**Data Expansion V1 je dokončený a nasadený online.**
 
-- register ÄŹalĹˇĂ­ch slovenskĂ˝ch a ÄŤeskĂ˝ch zdrojov
-- dĂˇvkovĂ© preview
-- dĂˇvkovĂ˝ ostrĂ˝ sync
-- kontrola kvality
-- report zdrojov
-- zĂˇkladnĂ˝ orchestrĂˇtor
-- prĂ­prava na Cron
-- aktualizĂˇcia tohto PROJECT_STATUS.md po ĂşspeĹˇnom nasadenĂ­
+Dokončené:
+
+1. základné pokrytie všetkých 8 slovenských krajov
+2. prvá vlna českých miest a regiónov
+3. dávkový orchestrátor
+4. preview a ostrý sync
+5. report zdravia zdrojov
+6. oprava dátumov a základnej deduplikácie
+7. denný automatický Cron pre 22 zdrojov
+8. overený tok dát až do mobilnej aplikácie
+
+Ďalšie poradie:
+
+1. Data Expansion V2 – ticketové portály
+2. rozšírená deduplikácia medzi mestskými a ticketovými zdrojmi
+3. monitoring a upozornenia pri chybách
+4. fotografie
+5. krajšie karty
+6. trvalé obľúbené položky
 
 ---
 
-## PravidlĂˇ prĂˇce
+## Najbližší pracovný balík
 
-- produkciu meniĹĄ iba cez overenĂş migrĂˇciu alebo nasadzovacĂ­ skript
-- pred veÄľkou zmenou vytvoriĹĄ zĂˇlohu
-- najprv preview alebo lokĂˇlny test
-- potom malĂ˝ online sync
-- aĹľ potom vĂ¤ÄŤĹˇia dĂˇvka
-- po dokonÄŤenom balĂ­ku:
+**Data Expansion V2 – ticketové portály**
+
+Poradie konektorov:
+
+1. GoOut
+2. Predpredaj.sk
+3. Ticketportal
+4. TicketLIVE
+5. Eventim
+
+Každý konektor musí prejsť týmto postupom:
+
+- preverenie technického a právneho spôsobu získavania dát
+- lokálny alebo online preview bez zápisu
+- malý kontrolovaný sync
+- kontrola kvality a duplicít
+- až potom zaradenie do automatiky
+
+---
+
+## Pravidlá práce
+
+- produkciu meniť iba cez overenú migráciu alebo nasadzovací skript
+- pred veľkou zmenou vytvoriť zálohu
+- najprv preview alebo lokálny test
+- potom malý online sync
+- až potom väčšia dávka
+- po dokončenom balíku:
   - TypeScript kontrola
   - Git commit
   - Git push
-  - aktualizĂˇcia `PROJECT_STATUS.md`
+  - aktualizácia `PROJECT_STATUS.md`
