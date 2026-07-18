@@ -1,0 +1,41 @@
+{
+  "events": [
+    {
+      "externalId": "sample-family-001",
+      "title": "Rodinný festival – ukážková udalosť",
+      "sourceUrl": "https://partner.example/events/sample-family-001",
+      "purchaseUrl": "https://partner.example/tickets/sample-family-001",
+      "summary": "Syntetická testovacia udalosť. Nejde o reálne podujatie.",
+      "countryCode": "SK",
+      "city": "Banská Bystrica",
+      "region": "Banskobystrický kraj",
+      "venueName": "Testovacie námestie",
+      "address": "Testovacia 1, Banská Bystrica",
+      "startDate": "2026-09-05T14:00:00+02:00",
+      "endDate": "2026-09-05T20:00:00+02:00",
+      "allDay": false,
+      "freeEntry": false,
+      "priceMin": 8,
+      "priceMax": 16,
+      "currency": "EUR"
+    },
+    {
+      "externalId": "sample-free-002",
+      "title": "Detské dopoludnie – ukážková udalosť",
+      "sourceUrl": "https://partner.example/events/sample-free-002",
+      "countryCode": "CZ",
+      "city": "Brno",
+      "venueName": "Testovací park",
+      "startDate": "2026-09-12T09:30:00+02:00",
+      "endDate": "2026-09-12T08:00:00+02:00",
+      "freeEntry": true,
+      "currency": "CZK"
+    },
+    {
+      "externalId": "sample-invalid-003",
+      "title": "Neplatná ukážková udalosť",
+      "sourceUrl": "https://partner.example/events/sample-invalid-003",
+      "countryCode": "SK"
+    }
+  ]
+}
