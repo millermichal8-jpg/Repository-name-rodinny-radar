@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Published Event Guard V1
+**Aktuálny pracovný balík:** Published Event Guard V1 – lokálne testovanie
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -249,3 +249,12 @@ Bezpečnostné pravidlá:
 - lokálny databázový reset prešiel
 - online migrácia bola úspešne nasadená
 - ďalší krok: trvalá ochrana parsera a publikovania
+---
+
+## Published Event Guard V1 – rozpracované
+
+- parser Praha 12 prijíma iba skutočné detailné URL `/nazov/a-12345`
+- generické kategórie sa blokujú v parseri aj vo fronte Event Review
+- detailný dátum uprednostňuje pole Kdy/Termín pred dátumami v opise
+- štyri historické chybné položky sa natrvalo archivujú
+- ďalší krok: lokálny test, online preview bez zápisu a kontrolovaný sync Praha 12
