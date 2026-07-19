@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Slovakia Source Wave V1 – audit nefunkčných zdrojov
+**Aktuálny pracovný balík:** Trnava + Visit Trenčín Adapter V1 – pripravené podklady
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -367,3 +367,15 @@ Podrobný audit:
 docs/SLOVAKIA_SOURCE_TECHNICAL_AUDIT_V1.md
 
 <!-- SLOVAKIA_SOURCE_TECH_AUDIT_V1_END -->
+---
+
+## Checkpoint 19. 7. 2026
+
+- pracovná vetva: wip/slovakia-source-wave-v1
+- celoslovenský preview: 8 krajov a 15 zdrojov
+- zdravých zdrojov: 8
+- prijatých budúcich podujatí: 68
+- technický audit slovenských zdrojov je hotový
+- Trnava + Trenčín snapshot: 16 detailov a 0 chýb
+- ďalší krok: Trnava + Visit Trenčín Adapter V1
+- podrobnosti: docs/SESSION_CHECKPOINT_20260719.md
