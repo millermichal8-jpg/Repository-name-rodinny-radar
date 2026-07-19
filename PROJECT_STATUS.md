@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Slovakia Source Wave V1
+**Aktuálny pracovný balík:** Slovakia Source Wave V1 – audit nefunkčných zdrojov
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -303,3 +303,38 @@ Bezpečnostné pravidlá:
 - produkčný sync prešiel bez chyby
 - udalosti boli uložené do review frontu
 - ďalší balík: hromadná kontrola zdrojov zo všetkých ôsmich krajov
+
+<!-- SLOVAKIA_SOURCE_WAVE_V1_START -->
+
+---
+
+## Slovakia Source Wave V1 – priebežný stav
+
+Celoslovenský preview bol vykonaný bez zápisu do produkcie.
+
+- skontrolovaných krajov: 8
+- skontrolovaných zdrojov: 15
+- zdravých zdrojov: 8
+- prijatých budúcich podujatí: 68
+- chyby požiadaviek: 0
+
+### Zdravé zdroje
+
+- Bratislava BKIS
+- Senec
+- Bojnice
+- Banská Štiavnica
+- Zvolen
+- Banská Bystrica
+- PKO Prešov
+- Visit Košice
+
+### Ďalší pracovný krok
+
+Technický audit zdrojov Trnava, Nitra, Žilina, Tvrdošín a Visit Trenčín.
+Cieľom je nájsť spoločné webové platformy a vytvoriť skupinové adaptéry
+namiesto samostatného riešenia každého mesta.
+
+Podrobný report: docs/SLOVAKIA_SOURCE_WAVE_V1.md
+
+<!-- SLOVAKIA_SOURCE_WAVE_V1_END -->
