@@ -481,6 +481,15 @@ function parseHumanDateRange(text: string, yearIfMissing = new Date().getFullYea
     }
   }
 
+  match = clean.match(/\b(\d{1,2})\.(\d{1,2})\.(20\d{2})\s*[-–—]\s*(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/);
+  if (match) {
+    return {
+      startDate: isoFromParts(Number(match[3]), Number(match[2]), Number(match[1]), hour, minute),
+      endDate: isoFromParts(Number(match[6]), Number(match[5]), Number(match[4]), 23, 59),
+      allDay: !firstTime,
+    };
+  }
+
   match = clean.match(/\b(\d{1,2})\.(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/);
   if (match) {
     const year = Number(match[5]);
@@ -835,7 +844,7 @@ function extractLabeledValue(text: string, labels: string[], stopLabels: string[
   const escapedLabels = labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   const escapedStops = stopLabels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   const pattern = new RegExp(
-    `(?:${escapedLabels})\\s*:?\\s*(.*?)(?=\\s+(?:${escapedStops})\\s*:?|$)`,
+    `(?:${escapedLabels})\\s*:?\\s*(.*?)(?=\\s*(?:${escapedStops})\\s*:?|$)`,
     "iu",
   );
   return getString(collapseWhitespace(text.match(pattern)?.[1] ?? ""));
