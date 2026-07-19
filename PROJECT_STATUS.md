@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Event Date Display V1 dokončený
+**Aktuálny pracovný balík:** Published Event Guard V1
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -237,3 +237,15 @@ Bezpečnostné pravidlá:
 - filtre Dnes a Tento víkend pracujú s celým intervalom podujatia
 - prebiehajúce podujatia sa pri radení podľa dátumu zobrazujú medzi prvými
 - oprava bola overená na podujatí MOHÁČ 500 SK
+---
+
+## Published Event Hotfix V1 – dokončené
+
+- audit publikovaných podujatí bol vykonaný
+- štyri nesprávne položky Praha 12 boli vrátené do review
+- generické kategórie už nie sú publikované
+- dve položky letného kina so zlým termínom už nie sú publikované
+- počet publikovaných podujatí po hotfixe: 33
+- lokálny databázový reset prešiel
+- online migrácia bola úspešne nasadená
+- ďalší krok: trvalá ochrana parsera a publikovania
