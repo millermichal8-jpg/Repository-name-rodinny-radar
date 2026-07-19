@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Predpredaj.sk Access Review V1
+**Aktuálny pracovný balík:** Slovakia Source Wave V1
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -290,3 +290,16 @@ Bezpečnostné pravidlá:
 - pripravený je návrh partnerskej žiadosti
 - konektor zostáva vypnutý
 - pred databázovou migráciou sa overujú presné existujúce identifikátory projektu
+---
+
+## Banská Bystrica Detail Adapter V1 – dokončené
+
+- zdroj: oficiálny mestský kalendár Banskej Bystrice
+- parser otvára zoznam aj jednotlivé detailné stránky
+- lokálny preview prijal 18 z 18 podujatí
+- online preview prijal 18 z 18 podujatí
+- správne sa spracujú začiatky, konce, slovenské časové pásmo a ceny
+- komentované prehliadky kostolov majú cenu 4 EUR a nie sú označené ako bezplatné
+- produkčný sync prešiel bez chyby
+- udalosti boli uložené do review frontu
+- ďalší balík: hromadná kontrola zdrojov zo všetkých ôsmich krajov
