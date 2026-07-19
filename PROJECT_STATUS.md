@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Event Review V1 dokončený a nasadený online
+**Aktuálny pracovný balík:** Event Date Display V1 dokončený
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -227,3 +227,13 @@ Bezpečnostné pravidlá:
 - pripravených na publikovanie: 101
 - blokovaných kontrolou kvality alebo duplicít: 23
 - prvá kontrolovaná produkčná dávka prešla bez chyby
+---
+
+## Event Date Display V1 – dokončené
+
+- prebiehajúce viacdňové podujatia zobrazujú text Prebieha do
+- budúce viacdňové podujatia zobrazujú celý rozsah dátumov
+- skončené podujatia sa v aplikácii nezobrazujú
+- filtre Dnes a Tento víkend pracujú s celým intervalom podujatia
+- prebiehajúce podujatia sa pri radení podľa dátumu zobrazujú medzi prvými
+- oprava bola overená na podujatí MOHÁČ 500 SK
