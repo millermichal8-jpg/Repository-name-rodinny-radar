@@ -1,8 +1,9 @@
 # Rodinný radar – stav projektu
 
-**Posledná overená aktualizácia:** 18. 7. 2026  
-**Hlavná vetva:** `main`  
-**GitHub:** súkromný repozitár, lokálna vetva sleduje `origin/main`
+**Posledná overená aktualizácia:** 18. 7. 2026
+**Stabilná vetva:** `main`
+**Aktuálny pracovný balík:** `wip/event-review-v1`
+**GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
 
@@ -34,203 +35,171 @@ podľa mesta, vzdialenosti, dátumu, počtu ľudí a veku detí.
 - aplikácia sa spúšťa v Expo Go
 - letný vizuálny štýl
 - zadanie mesta s našepkávaním miest a obcí SK/CZ
-- počet dospelých
-- počet detí
+- počet dospelých a detí
 - samostatný vek každého dieťaťa
 - výber maximálnej vzdialenosti
 - trvalé výlety z Google Places
 - rozkliknuteľný detail výletu
-- adresa, hodnotenie, web, telefón a otváracie hodiny pri výlete
+- adresa, hodnotenie, web, telefón a otváracie hodiny
 - sekcia **Aktuálne podujatia**
-- reálne podujatia načítané z online katalógu
+- reálne podujatia z online katalógu
 - rozkliknuteľný detail podujatia
-- filtre:
-  - Všetky
-  - Dnes
-  - Tento víkend
-  - Zadarmo
+- filtre Všetky, Dnes, Tento víkend a Zadarmo
 - radenie podľa termínu alebo vzdialenosti
 - otvorenie oficiálnej stránky alebo odkazu na lístky
 
 ### Databáza a katalóg V2
 
 - univerzálny katalóg pre atrakcie aj podujatia
-- miesta a areály
-- organizátori
-- zážitky
-- konkrétne termíny
-- vstupenky a ceny
-- médiá
-- viac zdrojov jednej akcie
-- raw zdrojové záznamy
-- história synchronizácií
-- kandidáti na duplicity
-- história cien
-- kontrola kvality
+- miesta, organizátori, zážitky a konkrétne termíny
+- vstupenky, ceny, médiá a viac zdrojov jednej akcie
+- raw zdrojové záznamy a história synchronizácií
+- história cien a kontrola kvality
 - jednotný `experience_feed`
 - geografické vyhľadávanie cez PostGIS
 
-### Ticketmaster
+### Mestské a regionálne zdroje
+
+- základné pokrytie všetkých 8 slovenských krajov
+- prvá vlna českých miest a regiónov
+- denný Cron pre 22 zdrojov
+- dávkový orchestrátor s retry
+- Municipal parser V5 s detailnými adaptérmi a fallbackmi
+- fungujú Bojnice, Zvolen, Kultúrne centrum Banská Štiavnica
+- obnovené zdroje Ostrava, BKIS Bratislava, Senec a Banská Bystrica
+- posledný kontrolovaný sync zapísal alebo aktualizoval 31 podujatí
+- 0 chýb zápisu
+- Olomoucký kraj je technicky zdravý, ale posledný preview bol prázdny
+
+### Ticketmaster a partneri
 
 - Ticketmaster Discovery API je pripojené
-- preview režim bez zápisu funguje
-- ostrý sync do katalógu funguje
-- české podujatia sa úspešne zapisujú
+- preview aj ostrý sync fungujú
+- české podujatia sa zapisujú
 - Slovensko momentálne cez Ticketmaster vracia 0 udalostí
-- Ticketmaster ostáva doplnkový zdroj, nie hlavný slovenský zdroj
+- pripravený partner feed základ pre GoOut, Predpredaj, Ticketportal, TicketLIVE a Eventim
+- syntetický preview všetkých 5 partnerov funguje
+- reálne feedy čakajú na súhlasy alebo partnerské prístupy
 
-### Slovenské mestské a kultúrne zdroje
+### Kvalita a monitoring
 
-Municipal parser V3 je nasadený online a funguje pre:
-
-- Bojnice
-- Zvolen
-- Kultúrne centrum Banská Štiavnica
-
-Parser:
-
-- vyhľadáva detailné stránky podujatí
-- číta Schema.org Event/Offer, keď sú dostupné
-- používa HTML fallback
-- získava názov, termín, mesto, obrázok a cenu alebo vstup zdarma
-- filtruje staré a neplatné položky
-- prideľuje skóre kvality
-- robí základnú deduplikáciu
-- zapisuje udalosti do katalógu V2
-- overené udalosti sú publikované online
-- mobilný `experience-feed` ich vracia aplikácii
+- Data Quality V1 – kandidáti na duplicity a bezpečný manuálny merge
+- Source Reliability V1 – rozlíšenie reálnej chyby, prázdneho zdroja a zdroja iba s odkazmi
+- Source Recovery V1 – obnovené detailné parsovanie problematických zdrojov
+- Monitoring V1 – zdroje, Cron, opakované zlyhania a incidenty
+- automatické uzatvorenie incidentu po oprave
+- denný monitoring Cron je aktívny
+- posledná kontrola: 0 kritických chýb, 0 varovaní, 1 informačný incident
 
 ### Vývojové prostredie a automatizácia
 
-- Git repozitár je inicializovaný
-- projekt je pushnutý na súkromný GitHub
-- existuje bezpečný návratový baseline commit
-- Supabase CLI je nainštalované lokálne
-- všetky Edge Functions sú v `supabase/functions`
-- databázové migrácie sú v `supabase/migrations`
-- referenčné dáta sú v `supabase/seed.sql`
-- lokálny Supabase beží cez Docker
-- databáza sa dá vytvoriť od nuly cez migrácie a seed
-- `db reset` bol úspešne overený
-- lokálne testovacie výstupy a secrets sú ignorované v Gite
-- produkčné migrácie aj Edge Functions sa dajú nasadzovať cez CLI
+- Git repozitár a súkromný GitHub
+- bezpečné pracovné vetvy a merge do `main`
+- Supabase CLI lokálne
+- Edge Functions v `supabase/functions`
+- migrácie v `supabase/migrations`
+- referenčné dáta v `supabase/seed.sql`
+- lokálny Supabase cez Docker
+- úspešne overený `db reset`
+- lokálne testy s transakciou a `ROLLBACK`
+- produkčné migrácie aj funkcie sa nasadzujú cez CLI
+- secrets a testovacie výstupy sú ignorované v Gite
 
 ---
 
-## Čo zatiaľ nefunguje alebo nie je dokončené
+## Čo zatiaľ nie je dokončené
 
 ### Pokrytie dát
 
-- databáza podujatí je stále malá
-- Banská Bystrica zatiaľ našla odkazy, ale neprijala použiteľné udalosti
-- chýba vlastný adaptér pre Banskú Bystricu
-- chýba väčšina slovenských miest, regiónov a kultúrnych centier
-- základné pokrytie všetkých 8 slovenských krajov je pripojené
-- prvá vlna českých mestských a regionálnych zdrojov je pripojená
-- Ticketportal ešte nie je pripojený
-- Predpredaj.sk ešte nie je pripojený
-- GoOut ešte nie je pripojený
-- TicketLIVE ešte nie je pripojený
-- Eventim ešte nie je pripojený
-- Tavily ešte nie je pripojené
-- Firecrawl ešte nie je pripojený
-- PDF programy sa ešte univerzálne nespracúvajú
-- JavaScriptové kalendáre ešte nemajú univerzálny fallback
-- akcie zo sociálnych sietí a neverejných zdrojov nie sú pokryté
+- databáza podujatí sa musí ďalej rozširovať
+- Olomoucký kraj treba preveriť pri ďalšom behu
+- chýba väčšina menších miest, regiónov a kultúrnych centier
+- Ticketportal, Predpredaj, GoOut, TicketLIVE a Eventim ešte nemajú reálne partnerské feedy
+- Tavily a Firecrawl nie sú pripojené
+- PDF programy nemajú univerzálny parser
+- JavaScriptové kalendáre nemajú univerzálny fallback
+- sociálne siete a neverejné zdroje nie sú pokryté
 
-### Deduplikácia a kvalita
+### Review, deduplikácia a kvalita
 
-- deduplikácia je zatiaľ základná
-- rovnaká akcia z mesta, organizátora a ticketového portálu sa ešte nemusí vždy spojiť
-- chýba automatický review panel
-- chýba správa chýb a ručné schvaľovanie podozrivých položiek
-- chýba monitoring nefunkčných zdrojov
-- chýba automatické vyradenie dlhodobo nefunkčných zdrojov
+- Event Review V1 sa práve implementuje
+- zatiaľ nie je hotový grafický administrátorský panel
+- rozšírená deduplikácia medzi mestskými a ticketovými zdrojmi pokračuje
 - chýba automatická kontrola zrušených a presunutých podujatí
-- história cien je pripravená, ale ešte sa pravidelne neplní
+- história cien sa ešte neplní pravidelne
+- chýba automatické vyradenie dlhodobo nefunkčných zdrojov
 
 ### Mobilná aplikácia
 
-- fotografie podujatí a výletov nie sú vyriešené jednotne
-- karty ešte nie sú finálne dizajnovo doladené
-- obľúbené položky sa neukladajú trvalo do účtu
+- fotografie nie sú vyriešené jednotne
+- karty nie sú finálne dizajnovo doladené
+- obľúbené položky sa neukladajú trvalo
 - používateľské účty a prihlásenie nie sú hotové
 - synchronizácia medzi zariadeniami nie je hotová
-- vzdialenosť je pri časti obsahu stále iba približná
+- vzdialenosť je pri časti obsahu približná
 - reálna cesta autom nie je dokončená pre všetok obsah
 - vlak, autobus, prestupy a čas chôdze nie sú dokončené
 - chýba finálna kategorizácia podľa veku detí
-- chýba komplexné filtrovanie podľa kategórie, ceny a dostupnosti
-- chýba mapa výsledkov
-- chýba finálne prázdne/loading/error UI
-- chýba produkčný onboarding
+- chýba komplexné filtrovanie, mapa a produkčný onboarding
 
-### Produkcia a automatické behy
+### Produkcia
 
-- denný Cron je aktívny pre 22 overených slovenských a českých zdrojov
-- centrálny dávkový orchestrátor je nasadený online
-- základný automatický retry pri dočasnom výpadku webu funguje
-- chýba upozornenie pri chybe konektora
+- chýba externé upozornenie e-mailom pri kritickom incidente
 - chýba dashboard spotreby API a kvót
-- chýba oddelené staging prostredie
+- chýba samostatné staging prostredie
 - chýba CI/CD kontrola pri každom commite
-- chýbajú automatické integračné testy pre všetky konektory
+- chýbajú integračné testy pre všetky konektory
 
 ### Právne a obchodné veci
 
 - chýbajú pravidlá atribúcie zdrojov
 - chýbajú partnerské dohody s ticketovými portálmi
 - chýbajú podmienky používania
-- chýba ochrana osobných údajov a zásady súkromia
+- chýbajú zásady ochrany osobných údajov a súkromia
 - monetizácia a predplatné nie sú implementované
 
 ---
 
 ## Aktuálny hlavný cieľ
 
-**Data Expansion V1 je dokončený a nasadený online.**
+**Bezpečne dostať nové podujatia zo stavu `review` do mobilného `experience_feed`.**
 
-Dokončené:
+Dokončené pred Event Review V1:
 
-1. základné pokrytie všetkých 8 slovenských krajov
-2. prvá vlna českých miest a regiónov
-3. dávkový orchestrátor
-4. preview a ostrý sync
-5. report zdravia zdrojov
-6. oprava dátumov a základnej deduplikácie
-7. denný automatický Cron pre 22 zdrojov
-8. overený tok dát až do mobilnej aplikácie
+1. Data Expansion V1
+2. automatický Cron a orchestrátor
+3. Data Quality V1
+4. Monitoring V1
+5. Source Reliability V1
+6. Source Recovery V1
+7. kontrolovaný sync 31 podujatí bez chyby zápisu
 
-Ďalšie poradie:
+Aktuálne poradie:
 
-1. Data Expansion V2 – ticketové portály
-2. rozšírená deduplikácia medzi mestskými a ticketovými zdrojmi
-3. monitoring a upozornenia pri chybách
-4. fotografie
-5. krajšie karty
-6. trvalé obľúbené položky
+1. Event Review V1 – fronta, kontrola pripravenosti, schválenie, publikovanie, zamietnutie a audit
+2. overenie publikovaných podujatí v mobilnej aplikácii
+3. oprava alebo nové preverenie Olomouckého kraja
+4. Data Expansion V2 – reálne partner feedy po súhlase partnerov
+5. rozšírená deduplikácia medzi mestskými a ticketovými zdrojmi
+6. fotografie
+7. krajšie karty
+8. trvalé obľúbené položky
 
 ---
 
 ## Najbližší pracovný balík
 
-**Data Expansion V2 – ticketové portály**
+**Event Review V1**
 
-Poradie konektorov:
+Bezpečnostné pravidlá:
 
-1. GoOut
-2. Predpredaj.sk
-3. Ticketportal
-4. TicketLIVE
-5. Eventim
-
-Každý konektor musí prejsť týmto postupom:
-
-- preverenie technického a právneho spôsobu získavania dát
-- lokálny alebo online preview bez zápisu
-- malý kontrolovaný sync
-- kontrola kvality a duplicít
-- až potom zaradenie do automatiky
+- review nástroje nesmú byť vo verejnej mobilnej aplikácii bez účtov a rolí
+- prístup iba cez chránenú Edge Function a synchronizačný token
+- preview bez zápisu ako prvý krok
+- publikovať iba položky s budúcim termínom, mestom, oficiálnym odkazom a požadovanou kvalitou
+- blokovať nevyriešené pravdepodobné duplicity
+- každú zmenu auditovať
+- hromadný zápis iba s `confirmWrite: true`
 
 ---
 
@@ -239,7 +208,7 @@ Každý konektor musí prejsť týmto postupom:
 - produkciu meniť iba cez overenú migráciu alebo nasadzovací skript
 - pred veľkou zmenou vytvoriť zálohu
 - najprv preview alebo lokálny test
-- potom malý online sync
+- potom malý online sync alebo kontrolované publikovanie
 - až potom väčšia dávka
 - po dokončenom balíku:
   - TypeScript kontrola
