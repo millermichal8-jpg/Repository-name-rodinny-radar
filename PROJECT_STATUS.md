@@ -1,8 +1,8 @@
 # Rodinný radar – stav projektu
 
-**Posledná overená aktualizácia:** 18. 7. 2026
+**Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** `wip/event-review-v1`
+**Aktuálny pracovný balík:** Event Review V1 dokončený a nasadený online
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -215,3 +215,15 @@ Bezpečnostné pravidlá:
   - Git commit
   - Git push
   - aktualizácia `PROJECT_STATUS.md`
+
+---
+
+## Stav k 19. 7. 2026 – Event Review V1
+
+- Event Review V1 je nasadený online
+- funguje fronta review, schválenie, publikovanie, zamietnutie a audit
+- publikovaných podujatí spolu: 37
+- vo fronte review: 124
+- pripravených na publikovanie: 101
+- blokovaných kontrolou kvality alebo duplicít: 23
+- prvá kontrolovaná produkčná dávka prešla bez chyby
