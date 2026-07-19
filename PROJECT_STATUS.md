@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Published Event Guard V1
+**Aktuálny pracovný balík:** Published Event Guard V1 dokončený a nasadený online
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -249,3 +249,24 @@ Bezpečnostné pravidlá:
 - lokálny databázový reset prešiel
 - online migrácia bola úspešne nasadená
 - ďalší krok: trvalá ochrana parsera a publikovania
+---
+
+## Published Event Guard V1 – rozpracované
+
+- parser Praha 12 prijíma iba skutočné detailné URL `/nazov/a-12345`
+- generické kategórie sa blokujú v parseri aj vo fronte Event Review
+- detailný dátum uprednostňuje pole Kdy/Termín pred dátumami v opise
+- štyri historické chybné položky sa natrvalo archivujú
+- ďalší krok: lokálny test, online preview bez zápisu a kontrolovaný sync Praha 12
+
+---
+
+## Praha 12 Date Fix V1 – dokončené
+
+- detailné URL Praha 12 sú filtrované
+- generické kategórie sa neprijímajú
+- Křtiny majú správny termín 23. 7. 2026 o 21:30
+- Šviháci majú správny termín 30. 7. 2026 o 21:15
+- výstava Eva Vokatá má rozsah 1. 8. – 31. 8. 2026
+- lokálny aj online preview prešli bez zápisu
+- opravený municipal parser je nasadený online

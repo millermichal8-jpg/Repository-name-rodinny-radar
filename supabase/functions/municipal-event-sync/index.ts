@@ -121,6 +121,24 @@ const BLOCKED_TITLES = new Set([
   "detail akce",
   "kalendar akci",
   "kalendar podujati",
+  "kulturni akce zabava",
+  "ostatni akce",
+  "kulturni akce",
+  "sportovni akce",
+  "akce pro deti",
+  "akce pro seniory",
+  "osvetova akce vystava",
+  "verejna sprava",
+  "typ akce",
+  "jednodenni akce",
+  "vicedenni akce",
+  "kulturne akcie zabava",
+  "ostatne akcie",
+  "kulturne akcie",
+  "sportove akcie",
+  "akcie pre deti",
+  "akcie pre seniorov",
+  "osvetove akcie vystava",
 ]);
 
 const MONTHS: Record<string, number> = {
@@ -461,6 +479,15 @@ function parseHumanDateRange(text: string, yearIfMissing = new Date().getFullYea
         allDay: !firstTime,
       };
     }
+  }
+
+  match = clean.match(/\b(\d{1,2})\.(\d{1,2})\.(20\d{2})\s*[-–—]\s*(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/);
+  if (match) {
+    return {
+      startDate: isoFromParts(Number(match[3]), Number(match[2]), Number(match[1]), hour, minute),
+      endDate: isoFromParts(Number(match[6]), Number(match[5]), Number(match[4]), 23, 59),
+      allDay: !firstTime,
+    };
   }
 
   match = clean.match(/\b(\d{1,2})\.(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(\d{1,2})\.(20\d{2})\b/);
@@ -817,7 +844,7 @@ function extractLabeledValue(text: string, labels: string[], stopLabels: string[
   const escapedLabels = labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   const escapedStops = stopLabels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   const pattern = new RegExp(
-    `(?:${escapedLabels})\\s*:?\\s*(.*?)(?=\\s+(?:${escapedStops})\\s*:?|$)`,
+    `(?:${escapedLabels})\\s*:?\\s*(.*?)(?=\\s*(?:${escapedStops})\\s*:?|$)`,
     "iu",
   );
   return getString(collapseWhitespace(text.match(pattern)?.[1] ?? ""));
@@ -965,17 +992,37 @@ async function parseGenericDetail(
   );
 
   const configuredDateText = selectorText($, scope, source.config?.dateSelector);
+  const labeledDateText = extractLabeledValue(
+    fullText,
+    ["Kdy", "Termín", "Termin", "Dátum", "Datum"],
+    [
+      "Kde",
+      "Miesto",
+      "Místo",
+      "Pořadatel akce",
+      "Pořadatel",
+      "Organizátor",
+      "Organizator",
+      "Typ akce",
+      "Zodpovídá",
+      "Vytvořeno",
+      "Kontakt",
+    ],
+  );
   const dateTimeAttr = scope.find("time[datetime]").first().attr("datetime");
   const parsedAttr = parseDateTimeAttribute(dateTimeAttr);
-  const dateProbe = collapseWhitespace(`${configuredDateText ?? ""} ${seed?.text ?? ""} ${eventWindow.slice(0, 2200)}`);
+  const parsedConfiguredDate = parseHumanDateRange(configuredDateText ?? "");
+  const parsedLabeledDate = parseHumanDateRange(labeledDateText ?? "");
+  const fallbackDate = parseHumanDateRange(eventWindow.slice(0, 2200));
   const date = parsedAttr?.startDate
     ? parsedAttr
-    : parseHumanDateRange(dateProbe);
-  if (!date.startDate && seed?.date.startDate) {
-    date.startDate = seed.date.startDate;
-    date.endDate = seed.date.endDate;
-    date.allDay = seed.date.allDay;
-  }
+    : parsedConfiguredDate.startDate
+    ? parsedConfiguredDate
+    : parsedLabeledDate.startDate
+    ? parsedLabeledDate
+    : seed?.date.startDate
+    ? { ...seed.date }
+    : fallbackDate;
   if (!date.startDate) return null;
 
   const venueName = selectorText($, scope, source.config?.venueSelector) ??
@@ -1025,7 +1072,17 @@ async function parseGenericDetail(
       parser: "generic-detail-v4",
       seedText: truncate(seed?.text ?? null, 1200),
       configuredDateText,
+      labeledDateText,
       dateTimeAttr,
+      dateSource: parsedAttr?.startDate
+        ? "datetime-attribute"
+        : parsedConfiguredDate.startDate
+        ? "configured-selector"
+        : parsedLabeledDate.startDate
+        ? "labeled-detail"
+        : seed?.date.startDate
+        ? "listing-card"
+        : "detail-fallback",
       eventWindow: truncate(eventWindow, 1800),
     },
   };
