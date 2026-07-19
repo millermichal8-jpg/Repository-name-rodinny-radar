@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Slovakia Source Wave V1 – technický audit zdrojov
+**Aktuálny pracovný balík:** Slovakia Source Wave V1 – audit nefunkčných zdrojov
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
