@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** GoOut Access Review V1
+**Aktuálny pracovný balík:** Predpredaj.sk Access Review V1
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -280,3 +280,13 @@ Bezpečnostné pravidlá:
 - scraping obsahu GoOut nebude použitý
 - technická partner-feed vrstva je pripravená na autorizovaný prístup
 - ďalší dátový zdroj na preverenie: Predpredaj.sk
+---
+
+## Predpredaj.sk Access Review V1
+
+- oficiálny kontakt pre spoluprácu bol nájdený
+- verejné API alebo dátový feed zatiaľ nebol potvrdený
+- žiadosť o dátový prístup ešte nebola odoslaná
+- pripravený je návrh partnerskej žiadosti
+- konektor zostáva vypnutý
+- pred databázovou migráciou sa overujú presné existujúce identifikátory projektu
