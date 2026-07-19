@@ -100,22 +100,75 @@ function getWeekendRange(reference = new Date()) {
   return { saturday, sunday };
 }
 
+function getEventInterval(event: ExperienceFeedEvent) {
+  if (!event.startsAt) {
+    return null;
+  }
+
+  const start = new Date(event.startsAt);
+
+  if (Number.isNaN(start.getTime())) {
+    return null;
+  }
+
+  const candidateEnd = event.endsAt
+    ? new Date(event.endsAt)
+    : start;
+
+  const end =
+    Number.isNaN(candidateEnd.getTime()) ||
+    candidateEnd.getTime() < start.getTime()
+      ? start
+      : candidateEnd;
+
+  return { start, end };
+}
+
+function isSameLocalDay(first: Date, second: Date) {
+  return (
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
+}
+
 function isEventInRange(
   event: ExperienceFeedEvent,
   from: Date,
   to: Date,
 ) {
-  if (!event.startsAt) {
+  const interval = getEventInterval(event);
+
+  if (!interval) {
     return false;
   }
 
-  const startsAt = new Date(event.startsAt);
+  return (
+    interval.start.getTime() <= to.getTime() &&
+    interval.end.getTime() >= from.getTime()
+  );
+}
 
-  if (Number.isNaN(startsAt.getTime())) {
-    return false;
+function getEventSortTime(
+  event: ExperienceFeedEvent,
+  reference = new Date(),
+) {
+  const interval = getEventInterval(event);
+
+  if (!interval) {
+    return Number.MAX_VALUE;
   }
 
-  return startsAt >= from && startsAt <= to;
+  const referenceTime = reference.getTime();
+
+  if (
+    interval.start.getTime() <= referenceTime &&
+    interval.end.getTime() >= referenceTime
+  ) {
+    return referenceTime;
+  }
+
+  return interval.start.getTime();
 }
 
 function Stepper({
@@ -277,6 +330,14 @@ export default function HomeScreen() {
   const visibleEvents = events
     .filter((event) => {
       const now = new Date();
+      const interval = getEventInterval(event);
+
+      if (
+        interval &&
+        interval.end.getTime() < now.getTime()
+      ) {
+        return false;
+      }
 
       if (eventFilter === 'today') {
         return isEventInRange(
@@ -308,12 +369,8 @@ export default function HomeScreen() {
         }
       }
 
-      const firstDate = first.startsAt
-        ? new Date(first.startsAt).getTime()
-        : Number.MAX_VALUE;
-      const secondDate = second.startsAt
-        ? new Date(second.startsAt).getTime()
-        : Number.MAX_VALUE;
+      const firstDate = getEventSortTime(first);
+      const secondDate = getEventSortTime(second);
 
       return firstDate - secondDate;
     });
@@ -369,11 +426,60 @@ export default function HomeScreen() {
   }
 
   function formatEventDate(event: ExperienceFeedEvent) {
-    if (!event.startsAt) {
+    const interval = getEventInterval(event);
+
+    if (!interval) {
       return 'Termín bude doplnený';
     }
 
-    const start = new Date(event.startsAt);
+    const { start, end } = interval;
+    const now = new Date();
+    const hasDateRange =
+      Boolean(event.endsAt) &&
+      end.getTime() > start.getTime();
+
+    const isOngoing =
+      hasDateRange &&
+      start.getTime() <= now.getTime() &&
+      end.getTime() >= now.getTime();
+
+    if (isOngoing) {
+      if (isSameLocalDay(end, now) && !event.allDay) {
+        const endTime = end.toLocaleTimeString('sk-SK', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        return `Prebieha dnes do ${endTime}`;
+      }
+
+      const endDate = end.toLocaleDateString('sk-SK', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+      });
+
+      return `Prebieha do ${endDate}`;
+    }
+
+    if (hasDateRange && !isSameLocalDay(start, end)) {
+      const sameYear = start.getFullYear() === end.getFullYear();
+
+      const startDate = start.toLocaleDateString('sk-SK', {
+        day: 'numeric',
+        month: 'numeric',
+        ...(sameYear ? {} : { year: 'numeric' }),
+      });
+
+      const endDate = end.toLocaleDateString('sk-SK', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+      });
+
+      return `${startDate} – ${endDate}`;
+    }
+
     const date = start.toLocaleDateString('sk-SK', {
       weekday: 'short',
       day: 'numeric',
