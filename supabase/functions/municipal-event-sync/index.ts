@@ -619,7 +619,7 @@ function parseWebygroupDateFields(dateText: string, endText: string | null, time
 
 function parsePrice(text: string, defaultCurrency: "EUR" | "CZK" = "EUR") {
   const normalized = normalizeText(text);
-  const eurValues = [...text.matchAll(/(\d{1,5}(?:[,.]\d{1,2})?)\s*(?:€|EUR)\b/gi)]
+  const eurValues = [...text.matchAll(/(\d{1,5}(?:[,.]\d{1,2})?)\s*(?:€(?!\w)|EUR\b)/gi)]
     .map((match) => Number(match[1].replace(",", ".")))
     .filter((value) => Number.isFinite(value) && value >= 0 && value < 100_000);
   const czkValues = [...text.matchAll(/(\d{1,6}(?:[,.]\d{1,2})?)\s*(?:Kč|CZK)\b/gi)]
@@ -894,6 +894,105 @@ function parseDateTimeAttribute(value: string | undefined | null): ParsedDateRan
   };
 }
 
+function parseBratislavaDateTimeAttribute(
+  value: string | undefined | null,
+): ParsedDateRange | null {
+  if (!value) return null;
+  const local = value.match(
+    /^(20\d{2})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::\d{2})?)?$/,
+  );
+  if (local) {
+    const hasTime = Boolean(local[4]);
+    return {
+      startDate: isoFromParts(
+        Number(local[1]),
+        Number(local[2]),
+        Number(local[3]),
+        hasTime ? Number(local[4]) : null,
+        hasTime ? Number(local[5]) : null,
+      ),
+      endDate: null,
+      allDay: !hasTime,
+    };
+  }
+  return parseDateTimeAttribute(value);
+}
+
+function parseBanskaBystricaDateRange(
+  scope: cheerio.Cheerio<cheerio.AnyNode>,
+): ParsedDateRange | null {
+  const startValue = scope
+    .find('time[itemprop="startDate"][datetime]')
+    .first()
+    .attr("datetime");
+  const endValue = scope
+    .find('time[itemprop="endDate"][datetime]')
+    .first()
+    .attr("datetime");
+  const start = parseBratislavaDateTimeAttribute(startValue);
+  if (!start?.startDate) return null;
+  const end = parseBratislavaDateTimeAttribute(endValue);
+  return {
+    startDate: start.startDate,
+    endDate: end?.startDate ?? null,
+    allDay: start.allDay,
+  };
+}
+
+function extractBanskaBystricaDescription(
+  $: cheerio.CheerioAPI,
+  scope: cheerio.Cheerio<cheerio.AnyNode>,
+) {
+  const clone = scope.clone();
+  clone.children(".row").first().remove();
+  const informationHeading = clone
+    .find("h3")
+    .filter((_index: number, element: any) =>
+      normalizeText($(element).text()) === "informacie"
+    )
+    .first();
+  if (informationHeading.length) {
+    informationHeading.nextAll().remove();
+    informationHeading.remove();
+  }
+  clone.find("script,style,noscript,iframe,.Sharings,.ArticleFooter").remove();
+  return getString(collapseWhitespace(clone.text()));
+}
+
+function extractBanskaBystricaImage(
+  scope: cheerio.Cheerio<cheerio.AnyNode>,
+  sourceUrl: string,
+) {
+  const href = getString(scope.find("a.ThumbnailImage[href]").first().attr("href"));
+  return href ? absoluteUrl(href, sourceUrl) : null;
+}
+
+function parsePricePreferPaid(
+  text: string,
+  defaultCurrency: "EUR" | "CZK" = "EUR",
+) {
+  const standard = parsePrice(text, defaultCurrency);
+  const eurValues = [...text.matchAll(/(\d{1,5}(?:[,.]\d{1,2})?)\s*(?:€(?!\w)|EUR\b)/gi)]
+    .map((match) => Number(match[1].replace(",", ".")))
+    .filter((value) => Number.isFinite(value) && value > 0 && value < 100_000);
+  const czkValues = [...text.matchAll(/(\d{1,6}(?:[,.]\d{1,2})?)\s*(?:Kč|CZK)\b/gi)]
+    .map((match) => Number(match[1].replace(",", ".")))
+    .filter((value) => Number.isFinite(value) && value > 0 && value < 1_000_000);
+  const currency = czkValues.length > eurValues.length
+    ? "CZK"
+    : eurValues.length
+    ? "EUR"
+    : standard.currency;
+  const values = currency === "CZK" ? czkValues : eurValues;
+  if (!values.length) return standard;
+  return {
+    freeEntry: false,
+    priceMin: Math.min(...values),
+    priceMax: Math.max(...values),
+    currency,
+  };
+}
+
 function extractVenueFromText(text: string) {
   return extractLabeledValue(
     text,
@@ -967,9 +1066,20 @@ async function parseGenericDetail(
     if (candidate) return { ...candidate, parser: "jsonld" };
   }
 
-  const title = bestGenericTitle($, source, fallbackTitle);
-  if (!title) return null;
-  const scope = mainScope($);
+  const isBanskaBystrica = source.code === "bb-events";
+  const genericScope = mainScope($);
+  const bbScope = isBanskaBystrica
+    ? $(".MainbarSection[itemtype*='schema.org/Event']").first()
+    : genericScope;
+  const scope = bbScope.length ? bbScope : genericScope;
+  const bbTitle = isBanskaBystrica
+    ? getString(scope.find(".Mainbar__title--compact[itemprop='name']").first().text())
+    : null;
+  const title = bbTitle
+    ? cleanAnchorTitle(bbTitle)
+    : bestGenericTitle($, source, fallbackTitle);
+  if (!title || isBlockedTitle(title)) return null;
+
   const fullText = cleanedText($);
   const eventWindow = extractEventWindow(fullText, title, [
     "Podobné",
@@ -982,12 +1092,16 @@ async function parseGenericDetail(
     "Turistická informační centra",
   ]);
   const configuredDescription = selectorText($, scope, source.config?.descriptionSelector);
+  const bbDescription = isBanskaBystrica
+    ? extractBanskaBystricaDescription($, scope)
+    : null;
   const metaDescription = getString($('meta[name="description"]').attr("content")) ??
     getString($('meta[property="og:description"]').attr("content"));
   const description = collapseWhitespace(
-    configuredDescription ??
-      (eventWindow.length >= 60 ? eventWindow : null) ??
+    bbDescription ??
+      configuredDescription ??
       metaDescription ??
+      (eventWindow.length >= 60 ? eventWindow : null) ??
       fullText,
   );
 
@@ -1010,11 +1124,14 @@ async function parseGenericDetail(
     ],
   );
   const dateTimeAttr = scope.find("time[datetime]").first().attr("datetime");
+  const bbDate = isBanskaBystrica ? parseBanskaBystricaDateRange(scope) : null;
   const parsedAttr = parseDateTimeAttribute(dateTimeAttr);
   const parsedConfiguredDate = parseHumanDateRange(configuredDateText ?? "");
   const parsedLabeledDate = parseHumanDateRange(labeledDateText ?? "");
   const fallbackDate = parseHumanDateRange(eventWindow.slice(0, 2200));
-  const date = parsedAttr?.startDate
+  const date = bbDate?.startDate
+    ? bbDate
+    : parsedAttr?.startDate
     ? parsedAttr
     : parsedConfiguredDate.startDate
     ? parsedConfiguredDate
@@ -1025,14 +1142,25 @@ async function parseGenericDetail(
     : fallbackDate;
   if (!date.startDate) return null;
 
-  const venueName = selectorText($, scope, source.config?.venueSelector) ??
+  const bbVenue = isBanskaBystrica
+    ? getString(scope.find('[itemprop="location"]').first().text())
+    : null;
+  const venueName = bbVenue ??
+    selectorText($, scope, source.config?.venueSelector) ??
     extractVenueFromText(`${eventWindow.slice(0, 2600)} ${seed?.text ?? ""}`) ??
     seed?.venueName ??
     source.default_city;
-  const imageUrl = selectorImage($, scope, source.config?.imageSelector, finalUrl) ??
+  const bbImage = isBanskaBystrica
+    ? extractBanskaBystricaImage(scope, finalUrl)
+    : null;
+  const imageUrl = bbImage ??
+    selectorImage($, scope, source.config?.imageSelector, finalUrl) ??
     findImage($, finalUrl) ?? seed?.imageUrl ?? null;
   const defaultCurrency = source.config?.defaultCurrency ?? (source.country_code === "CZ" ? "CZK" : "EUR");
-  const price = parsePrice(`${seed?.text ?? ""} ${description}`, defaultCurrency);
+  const priceText = `${seed?.text ?? ""} ${description}`;
+  const price = isBanskaBystrica
+    ? parsePricePreferPaid(priceText, defaultCurrency)
+    : parsePrice(priceText, defaultCurrency);
   const canceled = isCanceledText(`${title} ${description}`);
   const externalId = await sha256(`${source.source_code}|${finalUrl}|${title}|${date.startDate}`);
   let qualityScore = 72;
@@ -1069,12 +1197,14 @@ async function parseGenericDetail(
     canceled,
     parser: "generic-detail",
     raw: {
-      parser: "generic-detail-v4",
+      parser: isBanskaBystrica ? "bb-citio-detail-v1" : "generic-detail-v4",
       seedText: truncate(seed?.text ?? null, 1200),
       configuredDateText,
       labeledDateText,
       dateTimeAttr,
-      dateSource: parsedAttr?.startDate
+      dateSource: bbDate?.startDate
+        ? "bb-citio-datetime"
+        : parsedAttr?.startDate
         ? "datetime-attribute"
         : parsedConfiguredDate.startDate
         ? "configured-selector"
