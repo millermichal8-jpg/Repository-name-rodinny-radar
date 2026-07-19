@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Published Event Guard V1 dokončený a nasadený online
+**Aktuálny pracovný balík:** GoOut Access Review V1
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -270,3 +270,13 @@ Bezpečnostné pravidlá:
 - výstava Eva Vokatá má rozsah 1. 8. – 31. 8. 2026
 - lokálny aj online preview prešli bez zápisu
 - opravený municipal parser je nasadený online
+---
+
+## GoOut Access Review V1
+
+- verejný API alebo feed prístup zatiaľ nebol potvrdený
+- žiadosť o prístup ešte nebola odoslaná
+- GoOut konektor zostáva bezpečne vypnutý
+- scraping obsahu GoOut nebude použitý
+- technická partner-feed vrstva je pripravená na autorizovaný prístup
+- ďalší dátový zdroj na preverenie: Predpredaj.sk
