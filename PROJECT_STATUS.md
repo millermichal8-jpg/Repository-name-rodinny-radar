@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Slovakia Source Wave V1 – audit nefunkčných zdrojov
+**Aktuálny pracovný balík:** Slovakia Source Wave V1 – technický audit zdrojov
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -338,3 +338,32 @@ namiesto samostatného riešenia každého mesta.
 Podrobný report: docs/SLOVAKIA_SOURCE_WAVE_V1.md
 
 <!-- SLOVAKIA_SOURCE_WAVE_V1_END -->
+
+<!-- SLOVAKIA_SOURCE_TECH_AUDIT_V1_START -->
+
+---
+
+## Slovakia Source Technical Audit V1 – priebežný stav
+
+- auditovaných stránok: 8
+- úspešne stiahnutých: 8
+- chyby požiadaviek: 0
+- produkcia ani databáza neboli zmenené
+
+### Identifikované typy riešení
+
+- Trnava kultúra: calendar-list adaptér
+- Visit Trenčín: query-ID detail adaptér
+- Nitra: list-only ročný adaptér
+- Žilina: dynamický kalendár alebo dátový endpoint
+- Tvrdošín: nájdenie skutočnej podstránky kalendára
+- Trnava mesto: preverenie duplicity a starej URL
+
+### Nasledujúci pracovný balík
+
+Trnava + Visit Trenčín Shared Adapter Wave V1.
+
+Podrobný audit:
+docs/SLOVAKIA_SOURCE_TECHNICAL_AUDIT_V1.md
+
+<!-- SLOVAKIA_SOURCE_TECH_AUDIT_V1_END -->
