@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Slovakia Source Wave V1
+**Aktuálny pracovný balík:** Slovakia Source Wave V1 – Nitra, Zilina a Tvrdosin
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -303,3 +303,95 @@ Bezpečnostné pravidlá:
 - produkčný sync prešiel bez chyby
 - udalosti boli uložené do review frontu
 - ďalší balík: hromadná kontrola zdrojov zo všetkých ôsmich krajov
+
+<!-- SLOVAKIA_SOURCE_WAVE_V1_START -->
+
+---
+
+## Slovakia Source Wave V1 – priebežný stav
+
+Celoslovenský preview bol vykonaný bez zápisu do produkcie.
+
+- skontrolovaných krajov: 8
+- skontrolovaných zdrojov: 15
+- zdravých zdrojov: 8
+- prijatých budúcich podujatí: 68
+- chyby požiadaviek: 0
+
+### Zdravé zdroje
+
+- Bratislava BKIS
+- Senec
+- Bojnice
+- Banská Štiavnica
+- Zvolen
+- Banská Bystrica
+- PKO Prešov
+- Visit Košice
+
+### Ďalší pracovný krok
+
+Technický audit zdrojov Trnava, Nitra, Žilina, Tvrdošín a Visit Trenčín.
+Cieľom je nájsť spoločné webové platformy a vytvoriť skupinové adaptéry
+namiesto samostatného riešenia každého mesta.
+
+Podrobný report: docs/SLOVAKIA_SOURCE_WAVE_V1.md
+
+<!-- SLOVAKIA_SOURCE_WAVE_V1_END -->
+
+<!-- SLOVAKIA_SOURCE_TECH_AUDIT_V1_START -->
+
+---
+
+## Slovakia Source Technical Audit V1 – priebežný stav
+
+- auditovaných stránok: 8
+- úspešne stiahnutých: 8
+- chyby požiadaviek: 0
+- produkcia ani databáza neboli zmenené
+
+### Identifikované typy riešení
+
+- Trnava kultúra: calendar-list adaptér
+- Visit Trenčín: query-ID detail adaptér
+- Nitra: list-only ročný adaptér
+- Žilina: dynamický kalendár alebo dátový endpoint
+- Tvrdošín: nájdenie skutočnej podstránky kalendára
+- Trnava mesto: preverenie duplicity a starej URL
+
+### Nasledujúci pracovný balík
+
+Trnava + Visit Trenčín Shared Adapter Wave V1.
+
+Podrobný audit:
+docs/SLOVAKIA_SOURCE_TECHNICAL_AUDIT_V1.md
+
+<!-- SLOVAKIA_SOURCE_TECH_AUDIT_V1_END -->
+---
+
+## Checkpoint 19. 7. 2026
+
+- pracovná vetva: wip/slovakia-source-wave-v1
+- celoslovenský preview: 8 krajov a 15 zdrojov
+- zdravých zdrojov: 8
+- prijatých budúcich podujatí: 68
+- technický audit slovenských zdrojov je hotový
+- Trnava + Trenčín snapshot: 16 detailov a 0 chýb
+- ďalší krok: Trnava + Visit Trenčín Adapter V1
+- podrobnosti: docs/SESSION_CHECKPOINT_20260719.md
+---
+
+## Trnava + Visit Trencin Adapter V1 – dokoncene
+
+- Trnava mesto pouziva presny detailny parser
+- Kultura Trnava cita odkazy z celeho kalendara
+- Visit Trencin cita identifikatory data-eventid z kariet
+- Visit Trencin vytvara detailne URL v tvare /podujatia/?id=...
+- lokalny integracny test presiel
+- online preview presiel bez zapisu podujati
+- Trnava mesto online: odkazy 15, prijate 15
+- Kultura Trnava online: odkazy 7, prijate 7
+- Visit Trencin online: odkazy 10, prijate 10
+- parser a zdrojova konfiguracia su nasadene online
+- ostry produkcny sync podujati este nebol vykonany
+- dalsi balik: Nitra, Zilina a Tvrdosin
