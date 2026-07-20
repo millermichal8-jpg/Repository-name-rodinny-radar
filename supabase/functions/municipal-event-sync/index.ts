@@ -1563,6 +1563,86 @@ function findGenericCard(
   return null;
 }
 
+
+async function parseNitraCalendarCards(
+  source: SourcePage,
+  html: string,
+  finalUrl: string,
+) {
+  const $ = cheerio.load(html);
+  const candidates: EventCandidate[] = [];
+  const seen = new Set<string>();
+  let discoveredLinks = 0;
+
+  for (const element of $('a[href]').toArray()) {
+    const card = $(element);
+    const href = card.attr("href");
+    if (!href) continue;
+
+    const sourceUrl = absoluteUrl(href, finalUrl);
+    if (
+      !sourceUrl ||
+      !/^https:\/\/www\.nitra\.eu\/kalendar\/\d+\/[^/?#]+\/?$/i.test(sourceUrl) ||
+      !allowedGenericUrl(source, sourceUrl, finalUrl)
+    ) continue;
+
+    discoveredLinks += 1;
+
+    const title = getString(card.find("h3").first().text());
+    const dateText = collapseWhitespace(
+      card.find('span[aria-label="Trvanie udalosti"]').first().text(),
+    );
+    if (!title || isBlockedTitle(title) || !dateText) continue;
+
+    const date = parseHumanDateRange(dateText);
+    if (!date.startDate) continue;
+
+    const venueName = getString(
+      card.find("i.fa-location-dot").first().parent().find("span").first().text(),
+    );
+
+    const paragraphText = card.find("p").toArray()
+      .map((node: any) => collapseWhitespace($(node).text()))
+      .filter((value: string) => value && !/^(?:dnes|zajtra)$/iu.test(value));
+
+    const description = collapseWhitespace(
+      paragraphText
+        .filter((value: string) => !venueName || value !== venueName)
+        .join(" ") || title,
+    );
+
+    const imageRaw = card.find("img[src]").first().attr("src") ??
+      card.find("img[data-src]").first().attr("data-src");
+    const imageUrl = imageRaw ? absoluteUrl(imageRaw, finalUrl) : null;
+    const key = `${sourceUrl}|${date.startDate}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const candidate = await eventCandidateBase(
+      source,
+      sourceUrl,
+      collapseWhitespace(title),
+      description,
+      date,
+      venueName,
+      venueName,
+      imageUrl,
+      "nitra-calendar-card-v1",
+    );
+    candidate.parser = "generic-card";
+    candidate.raw = {
+      ...candidate.raw,
+      parser: "nitra-calendar-card-v1",
+      dateText,
+    };
+    candidates.push(candidate);
+
+    if (candidates.length >= source.max_event_links) break;
+  }
+
+  return { discoveredLinks, candidates };
+}
+
 async function parseGenericCards(
   source: SourcePage,
   html: string,
@@ -2045,6 +2125,18 @@ async function recordSourceRun(
 
 async function parseSource(source: SourcePage) {
   const listing = await fetchHtml(source.list_url);
+  if (source.code === "nitra-city-events") {
+    const parsed = await parseNitraCalendarCards(
+      source,
+      listing.html,
+      listing.finalUrl,
+    );
+    return {
+      discoveredLinks: parsed.discoveredLinks,
+      candidates: parsed.candidates,
+      detailErrors: [] as JsonObject[],
+    };
+  }
   if (source.adapter === "ticketware_cards_v3") {
     return {
       discoveredLinks: 0,
