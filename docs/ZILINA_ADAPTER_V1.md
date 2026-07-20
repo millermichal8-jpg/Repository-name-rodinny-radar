@@ -23,3 +23,19 @@ The city page loads events from a structured WordPress endpoint. The API returns
 - The local test uses preview only.
 - Production deployment and event sync are separate later steps.
 - Synced events will remain in `review` until explicitly approved.
+
+<!-- PRODUCTION_RESULT_START -->
+
+## Finalny overeny vysledok
+
+- API zaznamy: 100
+- aktualne prijate udalosti: 6
+- udalosti s obrazkom: 6
+- produkcny zapis: 6
+- chyby zdroja: 0
+- chyby zapisu: 0
+- publikacny stav: review
+- automaticke publikovanie: nie
+- finalny report: C:\Users\radko\Desktop\rr-zilina-production-sync-20260720-192913.json
+
+<!-- PRODUCTION_RESULT_END -->
