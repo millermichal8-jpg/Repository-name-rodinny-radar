@@ -3,6 +3,21 @@ import * as cheerio from "npm:cheerio@1.0.0";
 
 type JsonObject = Record<string, unknown>;
 
+type TvrdosinSnapshotEvent = {
+  id: string;
+  title: string;
+  summary?: string;
+  startDate: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  city?: string;
+  venueName?: string;
+  address?: string;
+  organizer?: string;
+  page?: number;
+};
+
 type SourceConfig = {
   allowedPathRegex?: string;
   allowedUrlRegex?: string;
@@ -20,6 +35,9 @@ type SourceConfig = {
   defaultCurrency?: "EUR" | "CZK";
   adminCategories?: string[];
   apiLimit?: number;
+  snapshotYear?: number;
+  snapshotDocumentUrl?: string;
+  snapshotEvents?: TvrdosinSnapshotEvent[];
 };
 
 type SourcePage = {
@@ -2284,6 +2302,24 @@ function jaccard(a: Set<string>, b: Set<string>) {
 }
 
 function sameEvent(a: EventCandidate, b: EventCandidate) {
+  const tvrdosinSnapshotIdA = a.raw?.parser === "tvrdosin-official-pdf-snapshot-v1"
+    ? getString(a.raw.snapshotEventId)
+    : null;
+  const tvrdosinSnapshotIdB = b.raw?.parser === "tvrdosin-official-pdf-snapshot-v1"
+    ? getString(b.raw.snapshotEventId)
+    : null;
+
+  // The official PDF contains separately scheduled sessions that may share
+  // almost the same title and start within one hour. Their curated snapshot
+  // IDs are authoritative, so distinct IDs must remain distinct events.
+  if (
+    tvrdosinSnapshotIdA &&
+    tvrdosinSnapshotIdB &&
+    tvrdosinSnapshotIdA !== tvrdosinSnapshotIdB
+  ) {
+    return false;
+  }
+
   const startA = new Date(a.startDate ?? 0).getTime();
   const startB = new Date(b.startDate ?? 0).getTime();
   if (Math.abs(startA - startB) > 60 * 60 * 1000) return false;
@@ -2378,7 +2414,134 @@ async function recordSourceRun(
   }
 }
 
+function tvrdosinSnapshotTime(value: unknown) {
+  const raw = getString(value);
+  const match = raw?.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+  return match
+    ? { hour: Number(match[1]), minute: Number(match[2]) }
+    : null;
+}
+
+async function parseTvrdosinPdfSnapshot(source: SourcePage) {
+  const configuredEvents = Array.isArray(source.config?.snapshotEvents)
+    ? source.config.snapshotEvents
+    : [];
+  const documentUrl = getString(source.config?.snapshotDocumentUrl) ?? source.list_url;
+  const snapshotYear = Number(source.config?.snapshotYear ?? 2026);
+  const candidates: EventCandidate[] = [];
+  let discoveredLinks = 0;
+
+  for (const rawEvent of configuredEvents) {
+    if (!isObject(rawEvent)) continue;
+    discoveredLinks += 1;
+
+    const event = rawEvent as TvrdosinSnapshotEvent;
+    const id = getString(event.id);
+    const title = getString(event.title);
+    const startParts = parseIsoDateParts(event.startDate);
+    if (!id || !title || !startParts || isBlockedTitle(title)) continue;
+
+    const endParts = parseIsoDateParts(event.endDate) ?? startParts;
+    const startTime = tvrdosinSnapshotTime(event.startTime);
+    const endTime = tvrdosinSnapshotTime(event.endTime);
+    const allDay = !startTime;
+    const startDate = isoFromParts(
+      startParts.year,
+      startParts.month,
+      startParts.day,
+      startTime?.hour ?? null,
+      startTime?.minute ?? null,
+    );
+    if (!startDate) continue;
+
+    let endDate: string | null = null;
+    if (endTime) {
+      endDate = isoFromParts(
+        endParts.year,
+        endParts.month,
+        endParts.day,
+        endTime.hour,
+        endTime.minute,
+      );
+    } else if (getString(event.endDate)) {
+      endDate = isoFromParts(
+        endParts.year,
+        endParts.month,
+        endParts.day,
+        23,
+        59,
+      );
+    }
+
+    const venueName = getString(event.venueName) ?? source.default_city;
+    const address = getString(event.address) ?? venueName;
+    const city = getString(event.city) ?? source.default_city;
+    const organizer = getString(event.organizer);
+    const summary = getString(event.summary) ?? title;
+    const description = collapseWhitespace([
+      summary,
+      organizer ? `Organizátor: ${organizer}` : null,
+      venueName ? `Miesto: ${venueName}` : null,
+    ].filter((value): value is string => Boolean(value)).join(" "));
+    const page = Number(event.page ?? 1);
+    const sourceUrl = `${documentUrl}#page=${page}&event=${encodeURIComponent(id)}`;
+    const externalId = await sha256(`${source.source_code}|tvrdosin-pdf|${id}`);
+
+    let qualityScore = 82;
+    if (description.length > 100) qualityScore += 5;
+    if (venueName || address) qualityScore += 5;
+    if (startTime) qualityScore += 3;
+    if (endDate) qualityScore += 2;
+
+    candidates.push({
+      sourceCode: source.source_code,
+      sourcePageCode: source.code,
+      sourceUrl,
+      externalId,
+      title: collapseWhitespace(title),
+      summary: truncate(summary, 500),
+      description: truncate(description, 4000),
+      startDate,
+      endDate,
+      allDay,
+      city,
+      region: source.default_region,
+      countryCode: source.country_code,
+      venueName,
+      address,
+      imageUrl: null,
+      freeEntry: false,
+      priceMin: null,
+      priceMax: null,
+      currency: source.config?.defaultCurrency ?? "EUR",
+      purchaseUrl: documentUrl,
+      qualityScore: Math.min(100, qualityScore),
+      warnings: [],
+      canceled: false,
+      parser: "generic-card",
+      raw: {
+        parser: "tvrdosin-official-pdf-snapshot-v1",
+        snapshotYear,
+        snapshotEventId: id,
+        documentUrl,
+        page,
+        organizer,
+        timeSource: startTime ? "official-pdf-explicit-or-title" : "date-only",
+      },
+    });
+  }
+
+  return {
+    discoveredLinks,
+    candidates,
+    detailErrors: [] as JsonObject[],
+  };
+}
+
 async function parseSource(source: SourcePage) {
+  if (source.code === "tvrdosin-events") {
+    return parseTvrdosinPdfSnapshot(source);
+  }
   if (source.code === "zilina-events") {
     return parseZilinaEventApi(source);
   }

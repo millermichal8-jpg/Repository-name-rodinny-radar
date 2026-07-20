@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktualny pracovny balik:** Tvrdosin Adapter V1
+**Aktualny pracovny balik:** Tvrdosin Adapter V1 - local green
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -441,3 +441,25 @@ docs/SLOVAKIA_SOURCE_TECHNICAL_AUDIT_V1.md
 - dalsi balik: Tvrdosin Adapter V1
 
 <!-- ZILINA_ADAPTER_V1_FINAL_END -->
+
+<!-- TVRDOSIN_ADAPTER_V1_LOCAL_FINAL_START -->
+
+---
+
+## Tvrdosin Adapter V1 - local green
+
+- official source: City of Tvrdosin annual PDF calendar 2026
+- parser: tvrdosin-official-pdf-snapshot-v1
+- configured events: 44
+- accepted current events: 44
+- preview items: 44
+- events with explicit time: 13
+- source errors: 0
+- local preview wrote nothing
+- production and online database were not changed
+- distinct curated snapshot IDs prevent valid sessions from merging
+- active branch: wip/tvrdosin-adapter-v1
+- next step: online migration dry-run, deployment and online preview
+- do not merge to main until online preview and review sync are verified
+
+<!-- TVRDOSIN_ADAPTER_V1_LOCAL_FINAL_END -->
