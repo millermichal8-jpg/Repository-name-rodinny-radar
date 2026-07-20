@@ -1051,6 +1051,282 @@ function bestGenericTitle(
   return null;
 }
 
+function parseFlexibleNumericDateRange(text: string): ParsedDateRange {
+  const clean = collapseWhitespace(text).replace(/\s*•\s*/g, " ");
+  let match = clean.match(
+    /(?:Kedy\s*:\s*)?(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})(?:\s+(\d{1,2})[.:](\d{2}))?\s*[-–—]\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})(?:\s+(\d{1,2})[.:](\d{2}))?/iu,
+  );
+  if (match) {
+    const startHour = match[4] ? Number(match[4]) : null;
+    const startMinute = match[5] ? Number(match[5]) : null;
+    const endHour = match[9] ? Number(match[9]) : 23;
+    const endMinute = match[10] ? Number(match[10]) : 59;
+    return {
+      startDate: isoFromParts(
+        Number(match[3]),
+        Number(match[2]),
+        Number(match[1]),
+        startHour,
+        startMinute,
+      ),
+      endDate: isoFromParts(
+        Number(match[8]),
+        Number(match[7]),
+        Number(match[6]),
+        endHour,
+        endMinute,
+      ),
+      allDay: startHour === null,
+    };
+  }
+
+  match = clean.match(
+    /(?:Kedy\s*:\s*)?(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})(?:\s+(\d{1,2})[.:](\d{2}))?/iu,
+  );
+  if (!match) return { startDate: null, endDate: null, allDay: false };
+  const hour = match[4] ? Number(match[4]) : null;
+  const minute = match[5] ? Number(match[5]) : null;
+  return {
+    startDate: isoFromParts(
+      Number(match[3]),
+      Number(match[2]),
+      Number(match[1]),
+      hour,
+      minute,
+    ),
+    endDate: null,
+    allDay: hour === null,
+  };
+}
+
+function datePartsFromIso(value: string | null) {
+  const match = value?.match(/^(20\d{2})-(\d{2})-(\d{2})T/);
+  if (!match) return null;
+  return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
+}
+
+function applyDescriptionTime(date: ParsedDateRange, description: string): ParsedDateRange {
+  if (!date.startDate || !date.allDay) return date;
+  const time = parseTime(description);
+  const parts = datePartsFromIso(date.startDate);
+  if (!time || !parts) return date;
+  return {
+    ...date,
+    startDate: isoFromParts(parts.year, parts.month, parts.day, time.hour, time.minute),
+    allDay: false,
+  };
+}
+
+function parseTrnavaCultureDateRange(dateText: string, description: string): ParsedDateRange {
+  const sameMonth = collapseWhitespace(dateText).match(
+    /^(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.\s*([A-Za-zÁ-ž]+)\s+(20\d{2})$/u,
+  );
+  if (sameMonth) {
+    const month = MONTHS[normalizeMonth(sameMonth[3])];
+    const time = parseTime(description);
+    if (month) {
+      return {
+        startDate: isoFromParts(
+          Number(sameMonth[4]),
+          month,
+          Number(sameMonth[1]),
+          time?.hour ?? null,
+          time?.minute ?? null,
+        ),
+        endDate: isoFromParts(
+          Number(sameMonth[4]),
+          month,
+          Number(sameMonth[2]),
+          23,
+          59,
+        ),
+        allDay: !time,
+      };
+    }
+  }
+
+  const numeric = parseFlexibleNumericDateRange(dateText);
+  if (numeric.startDate) return applyDescriptionTime(numeric, description);
+  return parseHumanDateRange(`${dateText} ${description.slice(0, 1600)}`);
+}
+
+function eventCandidateBase(
+  source: SourcePage,
+  finalUrl: string,
+  title: string,
+  description: string,
+  date: ParsedDateRange,
+  venueName: string | null,
+  address: string | null,
+  imageUrl: string | null,
+  parser: string,
+): Promise<EventCandidate> {
+  const defaultCurrency = source.config?.defaultCurrency ??
+    (source.country_code === "CZ" ? "CZK" : "EUR");
+  const price = parsePrice(description, defaultCurrency);
+  const canceled = isCanceledText(`${title} ${description}`);
+  return sha256(`${source.source_code}|${finalUrl}|${title}|${date.startDate}`).then((externalId) => ({
+    sourceCode: source.source_code,
+    sourcePageCode: source.code,
+    sourceUrl: finalUrl,
+    externalId,
+    title,
+    summary: truncate(description, 500),
+    description: truncate(description, 4000),
+    startDate: date.startDate,
+    endDate: date.endDate,
+    allDay: date.allDay,
+    city: source.default_city,
+    region: source.default_region,
+    countryCode: source.country_code,
+    venueName: venueName ?? source.default_city,
+    address,
+    imageUrl,
+    freeEntry: price.freeEntry,
+    priceMin: price.priceMin,
+    priceMax: price.priceMax,
+    currency: price.currency,
+    purchaseUrl: finalUrl,
+    qualityScore: Math.min(100,
+      80 +
+      (description.length > 100 ? 6 : 0) +
+      (imageUrl ? 5 : 0) +
+      (venueName || source.default_city ? 5 : 0) +
+      (date.endDate ? 2 : 0) +
+      (price.freeEntry || price.priceMin !== null ? 2 : 0)
+    ),
+    warnings: canceled ? ["Podujatie je zrušené"] : [],
+    canceled,
+    parser: "generic-detail",
+    raw: {
+      parser,
+      dateText: null,
+    },
+  }));
+}
+
+async function parseTrnavaCityDetail(
+  source: SourcePage,
+  $: cheerio.CheerioAPI,
+  finalUrl: string,
+): Promise<EventCandidate | null> {
+  const scope = $("#skiplink-content .content-column").first();
+  if (!scope.length) return null;
+  const title = getString(scope.children("h1").first().text()) ??
+    getString(scope.find("h1").first().text());
+  if (!title || isBlockedTitle(title)) return null;
+
+  const dateNode = scope.find("strong").filter((_index: number, element: any) =>
+    /^Kedy\s*:/iu.test(collapseWhitespace($(element).text()))
+  ).first().parent();
+  const dateText = collapseWhitespace(dateNode.text());
+  const date = parseFlexibleNumericDateRange(dateText);
+  if (!date.startDate) return null;
+
+  const description = collapseWhitespace(
+    scope.find(".staticpage").first().text() ||
+    $('meta[property="og:description"]').attr("content") ||
+    "",
+  );
+  const venueName = getString(
+    scope.find("p.g-my-20.g-font-size-18.g-font-weight-600").first().text(),
+  );
+  const imageRaw = scope.find(".staticpage img[src]").first().attr("src") ??
+    scope.find("img.d-block.w-100.g-mt-20[src]").first().attr("src");
+  const imageUrl = imageRaw ? absoluteUrl(imageRaw, finalUrl) : null;
+  const candidate = await eventCandidateBase(
+    source,
+    finalUrl,
+    collapseWhitespace(title),
+    description,
+    date,
+    venueName,
+    venueName,
+    imageUrl,
+    "trnava-city-detail-v1",
+  );
+  candidate.raw = { ...candidate.raw, dateText };
+  return candidate;
+}
+
+async function parseTrnavaKulturaDetail(
+  source: SourcePage,
+  $: cheerio.CheerioAPI,
+  finalUrl: string,
+): Promise<EventCandidate | null> {
+  const scope = $(".shadow").first();
+  if (!scope.length) return null;
+  const title = getString(
+    scope.find(".slider-info.border-bottom h1").first().text(),
+  );
+  if (!title || isBlockedTitle(title)) return null;
+  const dateText = collapseWhitespace(
+    scope.find(".slider-info.border-bottom p.is-size-4").first().text(),
+  );
+  const description = collapseWhitespace(
+    scope.find(".slider-info .content").first().text() ||
+    $('meta[property="og:description"]').attr("content") ||
+    "",
+  );
+  const date = parseTrnavaCultureDateRange(dateText, description);
+  if (!date.startDate) return null;
+  const imageRaw = getString($('meta[property="og:image"]').attr("content")) ??
+    scope.find("img[src]").first().attr("src");
+  const imageUrl = imageRaw ? absoluteUrl(imageRaw, finalUrl) : null;
+  const candidate = await eventCandidateBase(
+    source,
+    finalUrl,
+    collapseWhitespace(title),
+    description,
+    date,
+    source.default_city,
+    null,
+    imageUrl,
+    "trnava-kultura-detail-v1",
+  );
+  candidate.raw = { ...candidate.raw, dateText };
+  return candidate;
+}
+
+async function parseVisitTrencinDetail(
+  source: SourcePage,
+  $: cheerio.CheerioAPI,
+  finalUrl: string,
+): Promise<EventCandidate | null> {
+  const scope = $("#events .event-row").has("h1.event-title").first();
+  if (!scope.length) return null;
+  const title = getString(scope.find("h1.event-title").first().text());
+  if (!title || isBlockedTitle(title)) return null;
+  const dateText = collapseWhitespace(scope.find("p.event-title").first().text());
+  const date = parseFlexibleNumericDateRange(dateText);
+  if (!date.startDate) return null;
+  const bodyText = collapseWhitespace(
+    scope.find(".event-left-col").clone()
+      .find(".event-title-row, p.event-title, .event-images").remove().end().text(),
+  );
+  const metaDescription = getString($('meta[property="og:description"]').attr("content"));
+  const description = bodyText.length >= 60 ? bodyText : (metaDescription ?? bodyText);
+  const venueName = getString(scope.find("p.event-title a.font-dark").first().text());
+  const address = getString(scope.find(".event-location-info-text").first().text());
+  const imageRaw = scope.find(".event-right-col-img img[data-src]").first().attr("data-src") ??
+    scope.find(".event-right-col-img img[src]").first().attr("src") ??
+    getString($('meta[property="og:image"]').attr("content"));
+  const imageUrl = imageRaw ? absoluteUrl(imageRaw, finalUrl) : null;
+  const candidate = await eventCandidateBase(
+    source,
+    finalUrl,
+    collapseWhitespace(title),
+    description,
+    date,
+    venueName,
+    address,
+    imageUrl,
+    "visit-trencin-query-detail-v1",
+  );
+  candidate.raw = { ...candidate.raw, dateText };
+  return candidate;
+}
+
 async function parseGenericDetail(
   source: SourcePage,
   sourceUrl: string,
@@ -1059,6 +1335,15 @@ async function parseGenericDetail(
 ): Promise<EventCandidate | null> {
   const { html, finalUrl } = await fetchHtml(sourceUrl);
   const $ = cheerio.load(html);
+  if (source.code === "trnava-city-events") {
+    return parseTrnavaCityDetail(source, $, finalUrl);
+  }
+  if (source.code === "trnava-kultura-events") {
+    return parseTrnavaKulturaDetail(source, $, finalUrl);
+  }
+  if (source.code === "visit-trencin-events") {
+    return parseVisitTrencinDetail(source, $, finalUrl);
+  }
   const jsonEvents: JsonObject[] = [];
   for (const root of extractJsonLd($)) walkJson(root, jsonEvents);
   for (const event of jsonEvents) {
@@ -1778,19 +2063,74 @@ async function parseSource(source: SourcePage) {
     ? /^\/podujatia\/[^/]+\/?$/i
     : /^\/akcia\/[^/]+\/mid\/\d+\/[.]html$/i;
   let links: Array<{ url: string; title: string }>;
-  if (configuredUrl) {
+  if (source.code === "visit-trencin-events" && configuredUrl) {
     const $ = cheerio.load(listing.html);
     const found = new Map<string, string>();
-    mainScope($).find("a[href]").each((_index: number, element: any) => {
+
+    $("#events .event-row[data-title]").each(
+      (_index: number, element: any) => {
+        const row = $(element);
+        const eventId = getString(
+          row.find("[data-eventid]").first().attr("data-eventid"),
+        );
+
+        if (!eventId || !/^\d+$/.test(eventId)) return;
+
+        const url = absoluteUrl(
+          `/podujatia/?id=${eventId}`,
+          listing.finalUrl,
+        );
+
+        if (
+          !url ||
+          !allowedGenericUrl(source, url, listing.finalUrl) ||
+          !configuredUrl.test(url)
+        ) return;
+
+        const title = cleanAnchorTitle(
+          row.attr("data-title") ??
+          row.find(".event-title").first().text(),
+        );
+
+        if (!title || isBlockedTitle(title)) return;
+
+        found.set(url, title);
+      },
+    );
+
+    links = [...found.entries()]
+      .slice(0, source.max_event_links)
+      .map(([url, title]) => ({ url, title }));
+  } else if (configuredUrl) {
+    const $ = cheerio.load(listing.html);
+    const found = new Map<string, string>();
+
+    const anchorScope = source.code === "trnava-kultura-events"
+      ? $("a[href]")
+      : mainScope($).find("a[href]");
+
+    anchorScope.each((_index: number, element: any) => {
       const href = $(element).attr("href");
       if (!href) return;
+
       const url = absoluteUrl(href, listing.finalUrl);
-      if (!url || !allowedGenericUrl(source, url, listing.finalUrl) || !configuredUrl.test(url)) return;
+
+      if (
+        !url ||
+        !allowedGenericUrl(source, url, listing.finalUrl) ||
+        !configuredUrl.test(url)
+      ) return;
+
       const title = cleanAnchorTitle($(element).text());
+
       if (!title || isBlockedTitle(title)) return;
+
       found.set(url, title);
     });
-    links = [...found.entries()].slice(0, source.max_event_links).map(([url, title]) => ({ url, title }));
+
+    links = [...found.entries()]
+      .slice(0, source.max_event_links)
+      .map(([url, title]) => ({ url, title }));
   } else {
     links = discoverExactLinks(
       listing.html,
@@ -1930,7 +2270,7 @@ Deno.serve(async (request) => {
     if (action === "preview") {
       return jsonResponse({
         action,
-        version: "municipal-parser-v5",
+        version: "municipal-parser-v6",
         sources: sourceStats,
         stats: {
           sourceCount: sources.length,
@@ -1943,7 +2283,7 @@ Deno.serve(async (request) => {
         },
         preview: deduped,
         rejectedPreview: rejected.slice(0, 30),
-        note: "Preview nič nezapísal. V5 pridáva card-seeded recovery a robustnejšie čítanie detailov.",
+        note: "Preview nič nezapísal. V6 pridáva detailné adaptéry Trnavy a query-ID adaptér Visit Trenčín.",
       });
     }
 
@@ -1964,14 +2304,14 @@ Deno.serve(async (request) => {
 
     return jsonResponse({
       action,
-      version: "municipal-parser-v5",
+      version: "municipal-parser-v6",
       sources: sourceStats,
       stats: syncStats,
       synced,
       note: "Udalosti boli uložené so stavom review. Zdrojové zdravie bolo aktualizované.",
     });
   } catch (error) {
-    console.error("municipal-event-sync-v4:", error);
+    console.error("municipal-event-sync-v6:", error);
     return jsonResponse({
       error: error instanceof Error ? error.message : "Neznáma chyba.",
     }, 500);
