@@ -18,6 +18,8 @@ type SourceConfig = {
   imageSelector?: string;
   allowExternalHost?: boolean;
   defaultCurrency?: "EUR" | "CZK";
+  adminCategories?: string[];
+  apiLimit?: number;
 };
 
 type SourcePage = {
@@ -326,6 +328,43 @@ async function fetchHtml(url: string) {
     const html = await response.text();
     if (html.length > 5_000_000) throw new Error(`HTML je príliš veľké pre ${url}`);
     return { html, finalUrl: response.url || url };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+
+async function fetchJsonPost(url: string, body: unknown) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 35_000);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      redirect: "follow",
+      signal: controller.signal,
+      headers: {
+        "User-Agent": USER_AGENT,
+        Accept: "application/json",
+        "Accept-Language": "sk,cs;q=0.9,en;q=0.4",
+        "Cache-Control": "no-cache",
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status} pre ${url}`);
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) {
+      throw new Error(`Nepodporovaný obsah ${contentType} pre ${url}`);
+    }
+    const raw = await response.text();
+    if (raw.length > 5_000_000) throw new Error(`JSON je príliš veľký pre ${url}`);
+    let data: unknown;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(`Neplatný JSON pre ${url}`);
+    }
+    return { data, finalUrl: response.url || url };
   } finally {
     clearTimeout(timeout);
   }
@@ -1564,6 +1603,222 @@ function findGenericCard(
 }
 
 
+
+type ZilinaApiItem = JsonObject & {
+  id?: unknown;
+  name?: unknown;
+  url?: unknown;
+  content?: unknown;
+  perex?: unknown;
+  dateStart?: unknown;
+  dateEnd?: unknown;
+  timeStart?: unknown;
+  timeEnd?: unknown;
+  addressLocality?: unknown;
+  addressStreet?: unknown;
+  addressNumber?: unknown;
+  coordinatesLat?: unknown;
+  coordinatesLng?: unknown;
+  linkTicket?: unknown;
+  linkWeb?: unknown;
+  thumbnail?: unknown;
+};
+
+function htmlFragmentText(value: unknown) {
+  const raw = getString(value);
+  if (!raw) return "";
+  const $ = cheerio.load(`<body>${raw}</body>`);
+  $("script,style,noscript").remove();
+  return collapseWhitespace($("body").text());
+}
+
+function parseIsoDateParts(value: unknown) {
+  const raw = getString(value);
+  const match = raw?.match(/^(20\d{2})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return isValidDateParts(year, month, day)
+    ? { year, month, day }
+    : null;
+}
+
+function zilinaDateRange(item: ZilinaApiItem, description: string): ParsedDateRange {
+  const startParts = parseIsoDateParts(item.dateStart);
+  if (!startParts) return { startDate: null, endDate: null, allDay: true };
+
+  const endParts = parseIsoDateParts(item.dateEnd) ?? startParts;
+  const explicitWhen = extractLabeledValue(
+    description,
+    ["Kedy"],
+    ["Program", "Kde", "Vstup", "Kontakt", "Viac informácií"],
+  );
+  const startTime = parseTime(getString(item.timeStart) ?? explicitWhen ?? "");
+  const endTime = parseTime(getString(item.timeEnd) ?? "") ??
+    parseSecondTime(explicitWhen ?? "");
+  const allDay = !startTime;
+
+  const startDate = isoFromParts(
+    startParts.year,
+    startParts.month,
+    startParts.day,
+    startTime?.hour ?? 0,
+    startTime?.minute ?? 0,
+  );
+
+  let endDate: string | null = null;
+  if (endTime) {
+    endDate = isoFromParts(
+      endParts.year,
+      endParts.month,
+      endParts.day,
+      endTime.hour,
+      endTime.minute,
+    );
+  } else if (allDay || getString(item.dateEnd)) {
+    endDate = isoFromParts(
+      endParts.year,
+      endParts.month,
+      endParts.day,
+      23,
+      59,
+    );
+  }
+
+  return { startDate, endDate, allDay };
+}
+
+function zilinaThumbnailUrl(item: ZilinaApiItem, baseUrl: string) {
+  if (!isObject(item.thumbnail)) return null;
+  const direct = getString(item.thumbnail.url);
+  const sizes = isObject(item.thumbnail.sizes) ? item.thumbnail.sizes : null;
+  const preferred = sizes && isObject(sizes.large)
+    ? getString(sizes.large.url)
+    : null;
+  const full = sizes && isObject(sizes.full)
+    ? getString(sizes.full.url)
+    : null;
+  const raw = preferred ?? full ?? direct;
+  return raw ? absoluteUrl(raw, baseUrl) : null;
+}
+
+async function parseZilinaEventApi(source: SourcePage) {
+  const categories = Array.isArray(source.config?.adminCategories)
+    ? source.config.adminCategories.filter((value) => typeof value === "string")
+    : ["100", "102", "101", "99", "103"];
+  const limit = Math.max(20, Math.min(100, Number(source.config?.apiLimit ?? 100)));
+  const response = await fetchJsonPost(source.list_url, {
+    title: "Najbližšie podujatia",
+    adminCategories: categories,
+    limit,
+    moreButtonTitle: "",
+    moreButtonLink: "/podujatia/",
+    template: "list",
+    type: "new",
+    sort: "ASC",
+    noResultText: "<p>Žiadne podujatia</p>",
+  });
+
+  if (!isObject(response.data) || !Array.isArray(response.data.items)) {
+    throw new Error(`Žilina API nevrátilo pole items pre ${source.list_url}`);
+  }
+
+  const candidates: EventCandidate[] = [];
+  const seen = new Set<string>();
+  const items = response.data.items.slice(0, limit);
+
+  for (const rawItem of items) {
+    if (!isObject(rawItem)) continue;
+    const item = rawItem as ZilinaApiItem;
+    const apiId = getString(String(item.id ?? ""));
+    const title = getString(item.name);
+    const sourceUrlRaw = getString(item.url);
+    if (!apiId || !title || !sourceUrlRaw || isBlockedTitle(title)) continue;
+
+    const sourceUrl = absoluteUrl(sourceUrlRaw, response.finalUrl);
+    if (!sourceUrl || !allowedGenericUrl(source, sourceUrl, response.finalUrl)) continue;
+
+    const description = collapseWhitespace(
+      htmlFragmentText(item.content) || htmlFragmentText(item.perex) || title,
+    );
+    const date = zilinaDateRange(item, description);
+    if (!date.startDate) continue;
+
+    const addressParts = [
+      getString(item.addressStreet),
+      getString(item.addressNumber),
+      getString(item.addressLocality),
+    ].filter((value): value is string => Boolean(value));
+    const labeledPlace = extractLabeledValue(
+      description,
+      ["Kde"],
+      ["Kedy", "Program", "Vstup", "Kontakt", "Viac informácií"],
+    );
+    const address = getString(addressParts.join(" ")) ?? truncate(labeledPlace, 240);
+    const venueName = getString(item.addressLocality) ?? source.default_city;
+    const imageUrl = zilinaThumbnailUrl(item, sourceUrl);
+    const purchaseUrl = getString(item.linkTicket) ?? getString(item.linkWeb) ?? sourceUrl;
+    const price = parsePrice(description, source.config?.defaultCurrency ?? "EUR");
+    const canceled = isCanceledText(`${title} ${description}`);
+    const key = `${apiId}|${date.startDate}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    let qualityScore = 82;
+    if (description.length > 100) qualityScore += 5;
+    if (imageUrl) qualityScore += 5;
+    if (!date.allDay) qualityScore += 3;
+    if (address) qualityScore += 3;
+    if (price.freeEntry || price.priceMin !== null) qualityScore += 2;
+
+    const externalId = await sha256(`${source.source_code}|zilina-api|${apiId}`);
+    candidates.push({
+      sourceCode: source.source_code,
+      sourcePageCode: source.code,
+      sourceUrl,
+      externalId,
+      title: collapseWhitespace(title),
+      summary: truncate(description, 500),
+      description: truncate(description, 4000),
+      startDate: date.startDate,
+      endDate: date.endDate,
+      allDay: date.allDay,
+      city: source.default_city,
+      region: source.default_region,
+      countryCode: source.country_code,
+      venueName,
+      address,
+      imageUrl,
+      freeEntry: price.freeEntry,
+      priceMin: price.priceMin,
+      priceMax: price.priceMax,
+      currency: price.currency,
+      purchaseUrl,
+      qualityScore: Math.min(100, qualityScore),
+      warnings: canceled ? ["Podujatie je zrušené"] : [],
+      canceled,
+      parser: "generic-card",
+      raw: {
+        parser: "zilina-wordpress-api-v1",
+        apiId,
+        dateStart: getString(item.dateStart),
+        dateEnd: getString(item.dateEnd),
+        timeStart: getString(item.timeStart),
+        timeEnd: getString(item.timeEnd),
+        coordinatesLat: getString(item.coordinatesLat),
+        coordinatesLng: getString(item.coordinatesLng),
+      },
+    });
+  }
+
+  return {
+    discoveredLinks: items.length,
+    candidates,
+    detailErrors: [] as JsonObject[],
+  };
+}
+
 async function parseNitraCalendarCards(
   source: SourcePage,
   html: string,
@@ -2124,6 +2379,9 @@ async function recordSourceRun(
 }
 
 async function parseSource(source: SourcePage) {
+  if (source.code === "zilina-events") {
+    return parseZilinaEventApi(source);
+  }
   const listing = await fetchHtml(source.list_url);
   if (source.code === "nitra-city-events") {
     const parsed = await parseNitraCalendarCards(
@@ -2375,7 +2633,7 @@ Deno.serve(async (request) => {
         },
         preview: deduped,
         rejectedPreview: rejected.slice(0, 30),
-        note: "Preview nič nezapísal. V6 pridáva detailné adaptéry Trnavy a query-ID adaptér Visit Trenčín.",
+        note: "Preview nič nezapísal. V6 zahŕňa mestské adaptéry vrátane Nitra cards a Žilina WordPress API.",
       });
     }
 
