@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktualny pracovny balik:** Zilina Adapter V1 - analyza Citymind
+**Aktualny pracovny balik:** Tvrdosin Adapter V1
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -418,3 +418,26 @@ docs/SLOVAKIA_SOURCE_TECHNICAL_AUDIT_V1.md
 - dalsi balik: Zilina Adapter V1
 
 <!-- NITRA_ADAPTER_V1_FINAL_END -->
+
+<!-- ZILINA_ADAPTER_V1_FINAL_START -->
+
+---
+
+## Zilina Adapter V1 - dokoncene
+
+- oficialny zdroj: https://zilina.sk/wp-json/wp/v2/event
+- parser: zilina-wordpress-api-v1
+- lokalny preview: 100 API zaznamov, 6 aktualnych udalosti
+- online preview: 100 API zaznamov, 6 aktualnych udalosti
+- udalosti s obrazkom: 6
+- produkcny sync: 6 vlozenych alebo aktualizovanych
+- chyby zdroja: 0
+- chyby databazoveho zapisu: 0
+- stav vsetkych 6 zaznamov: review
+- udalosti neboli automaticky publikovane
+- parser a konfiguracia su nasadene online
+- kod je pripraveny na zlucenie do main
+- finalny report: C:\Users\radko\Desktop\rr-zilina-production-sync-20260720-192913.json
+- dalsi balik: Tvrdosin Adapter V1
+
+<!-- ZILINA_ADAPTER_V1_FINAL_END -->
