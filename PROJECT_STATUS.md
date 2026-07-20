@@ -2,7 +2,7 @@
 
 **Posledná overená aktualizácia:** 19. 7. 2026
 **Stabilná vetva:** `main`
-**Aktuálny pracovný balík:** Slovakia Source Wave V1 – Nitra, Zilina a Tvrdosin
+**Aktualny pracovny balik:** Zilina Adapter V1 - analyza Citymind
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -395,3 +395,26 @@ docs/SLOVAKIA_SOURCE_TECHNICAL_AUDIT_V1.md
 - parser a zdrojova konfiguracia su nasadene online
 - ostry produkcny sync podujati este nebol vykonany
 - dalsi balik: Nitra, Zilina a Tvrdosin
+
+<!-- NITRA_ADAPTER_V1_FINAL_START -->
+
+---
+
+## Nitra Adapter V1 - dokoncene
+
+- oficialny zdroj: https://www.nitra.eu/kalendar
+- parser: nitra-calendar-card-v1
+- lokalny preview: 21 odkazov, 14 prijatych udalosti
+- online preview: 21 odkazov, 14 prijatych udalosti
+- produkcny sync: 14 vlozenych alebo aktualizovanych
+- chyby zdroja: 0
+- chyby databazoveho zapisu: 0
+- stav vsetkych 14 zaznamov: review
+- udalosti neboli automaticky publikovane
+- prvy pokus zachytil docasny HTTP 500 a zapisal 0 zaznamov
+- kontrolovane opakovanie preslo na prvom pokuse
+- parser a konfiguracia su nasadene online
+- kod je pripraveny na zlucenie do main
+- dalsi balik: Zilina Adapter V1
+
+<!-- NITRA_ADAPTER_V1_FINAL_END -->

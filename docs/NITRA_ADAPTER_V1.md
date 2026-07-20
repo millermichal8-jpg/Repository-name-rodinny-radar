@@ -29,3 +29,25 @@ Oficialny kalendar udalosti:
 2. spustit lokalny test
 3. skontrolovat vysledok
 4. az potom pripravit Git commit a online preview bez zapisu
+
+<!-- PRODUCTION_RESULT_START -->
+
+## Finalny overeny vysledok
+
+- detailne odkazy: 21
+- prijate udalosti: 14
+- udalosti s casom: 14
+- udalosti s miestom: 14
+- udalosti s obrazkom: 11
+- produkcny zapis: 14
+- chyby zdroja: 0
+- chyby zapisu: 0
+- publikacny stav: review
+- automaticke publikovanie: nie
+- finalny report: C:\Users\radko\Desktop\rr-nitra-retry-20260720-160901\FINAL-SUCCESS.json
+
+Prvy produkcny pokus zachytil docasny HTTP 500 zo zdroja.
+Tento pokus zapisal 0 zaznamov. Kontrolovane opakovanie najskor
+overilo preview a potom uspesne zapisalo vsetkych 14 udalosti.
+
+<!-- PRODUCTION_RESULT_END -->
