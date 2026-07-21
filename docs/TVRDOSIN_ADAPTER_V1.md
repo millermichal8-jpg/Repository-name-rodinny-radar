@@ -35,9 +35,14 @@ Parser marker: `tvrdosin-official-pdf-snapshot-v1`
 
 ## Produkcia
 
-Zatiaľ nenasadené. Najprv musí prejsť lokálny test a následne online preview
-bez zápisu.
-
+- migrácia `20260720000400_tvrdosin_official_pdf_snapshot_v1.sql` je nasadená
+- online preview prešiel 44/44 bez zápisu
+- produkčný sync zapísal alebo aktualizoval 44 udalostí
+- chyby zápisu: 0
+- Event Review stav: 44 pending
+- pripravené na publikovanie: 44
+- automaticky publikované: 0
+- cron pre ročný PDF snapshot zostáva vypnutý
 <!-- LOCAL_RESULT_FINAL_START -->
 
 ## Final verified local result
@@ -52,3 +57,23 @@ bez zápisu.
 - status: ready for safe online dry-run and preview
 
 <!-- LOCAL_RESULT_FINAL_END -->
+
+<!-- PRODUCTION_REVIEW_RESULT_20260721_START -->
+
+## Produkčná Event Review kontrola – 21. 7. 2026
+
+- source code: `tvrdosin_events`
+- spolu: 44
+- pending: 44
+- pripravené na publikovanie: 44
+- blokované: 0
+- publikované: 0
+- nevyriešené duplicity: 0
+- chýbajúci budúci termín: 0
+- chýbajúci oficiálny odkaz: 0
+- kvalita pod 80: 0
+- rozdelenie miest: Liesek=2, Tvrdošín=41, Zuberec=1
+- presná zhoda s migračným snapshotom: 44/44
+- kontrola nevykonala žiadnu zmenu udalostí
+
+<!-- PRODUCTION_REVIEW_RESULT_20260721_END -->

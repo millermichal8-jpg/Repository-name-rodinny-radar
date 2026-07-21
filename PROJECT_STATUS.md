@@ -1,8 +1,8 @@
 # Rodinný radar – stav projektu
 
-**Posledná overená aktualizácia:** 19. 7. 2026
+**Posledná overená aktualizácia:** 21. 7. 2026
 **Stabilná vetva:** `main`
-**Aktualny pracovny balik:** Tvrdosin Adapter V1 - local green
+**Aktualny pracovny balik:** Tvrdošín Adapter V1 – produkčná review kontrola dokončená
 **GitHub:** súkromný repozitár, lokálne vetvy sledujú `origin`
 
 ## Cieľ
@@ -463,3 +463,21 @@ docs/SLOVAKIA_SOURCE_TECHNICAL_AUDIT_V1.md
 - do not merge to main until online preview and review sync are verified
 
 <!-- TVRDOSIN_ADAPTER_V1_LOCAL_FINAL_END -->
+
+<!-- TVRDOSIN_PRODUCTION_REVIEW_20260721_START -->
+
+## Tvrdošín Adapter V1 – produkčný stav k 21. 7. 2026
+
+- parser source page: `tvrdosin-events`
+- databázový Event Review source code: `tvrdosin_events`
+- nasadená migrácia: `20260720000400_tvrdosin_official_pdf_snapshot_v1.sql`
+- online preview: 44/44 prijatých, 0 chýb a 0 zápisov
+- produkčný sync: 44 vložených alebo aktualizovaných, 0 chýb zápisu
+- Event Review: 44 pending, 44 pripravených, 0 blokovaných
+- publikované: 0
+- nevyriešené duplicity: 0
+- očakávané aj produkčné rozdelenie miest: Liesek=2, Tvrdošín=41, Zuberec=1
+- presné porovnanie názvu, lokálneho dátumu a mesta: 44/44
+- ďalší krok: kontrolované publikovanie cez Event Review `batch-publish`
+
+<!-- TVRDOSIN_PRODUCTION_REVIEW_20260721_END -->
